@@ -1,12 +1,4 @@
 @tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-	@font-face {
-		font-family: 'Geist';
-		src: url('../../public/fonts/Geist-Variable.woff2')
-			format('woff2-variations');
-		display: 'swap';
-	}
-}
+  @tailwind components;
+  @tailwind utilities;
+  
