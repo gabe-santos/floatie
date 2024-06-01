@@ -1,0 +1,837 @@
+// File: components/edit-task.tsx
+import { forwardRef } from 'react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+
+interface EditTaskFormProps {
+  handleSubmit: (
+    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
+  ) => void;
+  setTaskInput: (value: string) => void;
+  inputRef: React.RefObject<HTMLInputElement>;
+  handleEnter: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  handleCancel: () => void;
+  taskInput: string;
+  setEditingTask: (editing: boolean) => void;
+}
+
+const EditTaskForm = forwardRef<HTMLInputElement, EditTaskFormProps>(
+  (
+    {
+      handleSubmit,
+      setTaskInput,
+      inputRef,
+      handleEnter,
+      handleCancel,
+      taskInput,
+    },
+    ref,
+  ) => {
+    return (
+      <form
+        onSubmit={handleSubmit}
+        className='flex flex-col gap-4 rounded-xl border border-black px-6 py-4'
+      >
+        <Input
+          value={taskInput}
+          onChange={(e) => setTaskInput(e.target.value)}
+          onKeyDown={handleEnter}
+          ref={inputRef}
+          type='text'
+          className=''
+        />
+        <div className='flex w-full justify-end gap-2'>
+          <Button variant='secondary' onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button type='submit'>Save</Button>
+        </div>
+      </form>
+    );
+  },
+);
+
+EditTaskForm.displayName = 'EditTaskForm';
+
+export default EditTaskForm;
+
+// File: components/task-list.tsx
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import Task from './task';
+import { Button } from './ui/button';
+import { PlusCircle } from 'lucide-react';
+import EditTaskForm from './edit-task';
+
+interface TaskListProps {
+  tasks: { id: number; title: string }[];
+}
+
+export default function TaskList({ tasks }: TaskListProps) {
+  const [editingTask, setEditingTask] = useState(false);
+  const [taskInput, setTaskInput] = useState('');
+  const newTaskRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingTask(false);
+    setTaskInput('');
+  };
+
+  const handleSubmit = (
+    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    e.preventDefault();
+    console.log(taskInput);
+    setEditingTask(false);
+    setTaskInput('');
+  };
+
+  useEffect(() => {
+    if (editingTask && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [editingTask]);
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (newTaskRef.current && !newTaskRef.current.contains(e.target as Node)) {
+      handleCancel();
+    }
+  };
+
+  const handleEscKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      handleCancel();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscKey);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, []);
+
+  return (
+    <div
+      className='flex w-1/2 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'
+      ref={newTaskRef}
+    >
+      <ul className='flex flex-col gap-2'>
+        {tasks.map((t) => (
+          <Task task={t} key={t.id} />
+        ))}
+      </ul>
+
+      {editingTask ? (
+        <EditTaskForm
+          handleSubmit={handleSubmit}
+          setTaskInput={setTaskInput}
+          inputRef={inputRef}
+          handleEnter={handleEnter}
+          handleCancel={handleCancel}
+          taskInput={taskInput}
+          setEditingTask={setEditingTask}
+        />
+      ) : (
+        <Button
+          variant='ghost'
+          className='flex h-full w-full items-center gap-2 border border-black border-opacity-0 px-2 hover:border-opacity-100'
+          onClick={() => setEditingTask(true)}
+        >
+          <PlusCircle size={24} />
+          <span className='flex-1 text-left'>New Task</span>
+        </Button>
+      )}
+    </div>
+  );
+}
+
+// File: components/task.tsx
+import { Check, Ellipsis } from 'lucide-react';
+import { Button } from './ui/button';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+} from './ui/dropdown-menu';
+import EditTaskForm from './edit-task';
+
+interface TaskProps {
+  task: { id: number; title: string };
+}
+
+export default function Task({ task }: TaskProps) {
+  const [isComplete, setIsComplete] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleMarkComplete = () => {
+    setIsComplete(!isComplete);
+  };
+
+  const handleEditTask = () => {
+    setIsEditing(true);
+  };
+
+  const titleStyles = isComplete ? 'opacity-50 line-through' : '';
+
+  return (
+    <div>
+      {isEditing ? (
+        <EditTaskForm
+          handleSubmit={(e) => {
+            e.preventDefault();
+            setIsEditing(false);
+          }}
+          setTaskInput={() => {}}
+          inputRef={{ current: null }}
+          handleEnter={() => {}}
+          handleCancel={() => setIsEditing(false)}
+          taskInput={task.title}
+          setEditingTask={setIsEditing}
+        />
+      ) : (
+        <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-2 py-1 transition-opacity hover:border-opacity-20'>
+          <Button
+            onClick={handleMarkComplete}
+            variant={'outline'}
+            role='checkbox'
+            className='transparent group/button flex h-6 w-6 items-center justify-center rounded-full p-0'
+          >
+            <Check
+              color='#000000'
+              size={12}
+              className='opacity-0 group-hover/button:opacity-100'
+            />
+          </Button>
+          <span
+            className={cn(
+              'flex-1 overflow-hidden whitespace-nowrap text-lg',
+              titleStyles,
+            )}
+          >
+            {task.title}
+          </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger className='opacity-0 group-hover/li:opacity-80'>
+              <Ellipsis className='' />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end' className='cursor-pointer'>
+              <DropdownMenuItem onClick={handleEditTask}>Edit</DropdownMenuItem>
+              <DropdownMenuItem className='text-red-600'>
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </li>
+      )}
+    </div>
+  );
+}
+
+// File: components/ui/button.tsx
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300",
+  {
+    variants: {
+      variant: {
+        default: "bg-slate-900 text-slate-50 hover:bg-slate-900/90 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/90",
+        destructive:
+          "bg-red-500 text-slate-50 hover:bg-red-500/90 dark:bg-red-900 dark:text-slate-50 dark:hover:bg-red-900/90",
+        outline:
+          "border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-800 dark:hover:text-slate-50",
+        secondary:
+          "bg-slate-100 text-slate-900 hover:bg-slate-100/80 dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-800/80",
+        ghost: "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
+        link: "text-slate-900 underline-offset-4 hover:underline dark:text-slate-50",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Button.displayName = "Button"
+
+export { Button, buttonVariants }
+
+// File: components/ui/dropdown-menu.tsx
+"use client"
+
+import * as React from "react"
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
+import { Check, ChevronRight, Circle } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+
+const DropdownMenu = DropdownMenuPrimitive.Root
+
+const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+
+const DropdownMenuGroup = DropdownMenuPrimitive.Group
+
+const DropdownMenuPortal = DropdownMenuPrimitive.Portal
+
+const DropdownMenuSub = DropdownMenuPrimitive.Sub
+
+const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
+
+const DropdownMenuSubTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
+    inset?: boolean
+  }
+>(({ className, inset, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.SubTrigger
+    ref={ref}
+    className={cn(
+      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-slate-100 data-[state=open]:bg-slate-100 dark:focus:bg-slate-800 dark:data-[state=open]:bg-slate-800",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <ChevronRight className="ml-auto h-4 w-4" />
+  </DropdownMenuPrimitive.SubTrigger>
+))
+DropdownMenuSubTrigger.displayName =
+  DropdownMenuPrimitive.SubTrigger.displayName
+
+const DropdownMenuSubContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.SubContent
+    ref={ref}
+    className={cn(
+      "z-50 min-w-[8rem] overflow-hidden rounded-md border border-slate-200 bg-white p-1 text-slate-950 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50",
+      className
+    )}
+    {...props}
+  />
+))
+DropdownMenuSubContent.displayName =
+  DropdownMenuPrimitive.SubContent.displayName
+
+const DropdownMenuContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
+>(({ className, sideOffset = 4, ...props }, ref) => (
+  <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border border-slate-200 bg-white p-1 text-slate-950 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50",
+        className
+      )}
+      {...props}
+    />
+  </DropdownMenuPrimitive.Portal>
+))
+DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
+
+const DropdownMenuItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
+    inset?: boolean
+  }
+>(({ className, inset, ...props }, ref) => (
+  <DropdownMenuPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-slate-100 focus:text-slate-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-800 dark:focus:text-slate-50",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+))
+DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
+
+const DropdownMenuCheckboxItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
+>(({ className, children, checked, ...props }, ref) => (
+  <DropdownMenuPrimitive.CheckboxItem
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-slate-100 focus:text-slate-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-800 dark:focus:text-slate-50",
+      className
+    )}
+    checked={checked}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <DropdownMenuPrimitive.ItemIndicator>
+        <Check className="h-4 w-4" />
+      </DropdownMenuPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </DropdownMenuPrimitive.CheckboxItem>
+))
+DropdownMenuCheckboxItem.displayName =
+  DropdownMenuPrimitive.CheckboxItem.displayName
+
+const DropdownMenuRadioItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
+>(({ className, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.RadioItem
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-slate-100 focus:text-slate-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-800 dark:focus:text-slate-50",
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <DropdownMenuPrimitive.ItemIndicator>
+        <Circle className="h-2 w-2 fill-current" />
+      </DropdownMenuPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </DropdownMenuPrimitive.RadioItem>
+))
+DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
+
+const DropdownMenuLabel = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
+    inset?: boolean
+  }
+>(({ className, inset, ...props }, ref) => (
+  <DropdownMenuPrimitive.Label
+    ref={ref}
+    className={cn(
+      "px-2 py-1.5 text-sm font-semibold",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+))
+DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
+
+const DropdownMenuSeparator = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-slate-100 dark:bg-slate-800", className)}
+    {...props}
+  />
+))
+DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
+
+const DropdownMenuShortcut = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => {
+  return (
+    <span
+      className={cn("ml-auto text-xs tracking-widest opacity-60", className)}
+      {...props}
+    />
+  )
+}
+DropdownMenuShortcut.displayName = "DropdownMenuShortcut"
+
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuRadioGroup,
+}
+
+// File: components/ui/input.tsx
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus-visible:ring-slate-300",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Input.displayName = "Input"
+
+export { Input }
+
+// File: app/auth/confirm/route.ts
+import { type EmailOtpType } from '@supabase/supabase-js';
+import { type NextRequest, NextResponse } from 'next/server';
+
+import { createClient } from '@/utils/supabase/server';
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const token_hash = searchParams.get('token_hash');
+  const type = searchParams.get('type') as EmailOtpType | null;
+  const next = searchParams.get('next') ?? '/';
+
+  const redirectTo = request.nextUrl.clone();
+  redirectTo.pathname = next;
+  redirectTo.searchParams.delete('token_hash');
+  redirectTo.searchParams.delete('type');
+
+  if (token_hash && type) {
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.verifyOtp({
+      type,
+      token_hash,
+    });
+    if (!error) {
+      redirectTo.searchParams.delete('next');
+      return NextResponse.redirect(redirectTo);
+    }
+  }
+
+  // return the user to an error page with some instructions
+  redirectTo.pathname = '/error';
+  return NextResponse.redirect(redirectTo);
+}
+
+// File: app/error/page.tsx
+export default function ErrorPage() {
+  return <p>Sorry, something went wrong</p>;
+}
+
+// File: app/globals.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* :root {
+  @font-face {
+    font-family: 'Geist';
+    src: url('../../public/fonts/Geist-Variable.woff2')
+      format('woff2-variations');
+    display: 'swap';
+  }
+} */
+
+body {
+  background-image: radial-gradient(
+    rgba(125, 125, 125, 0.202) 2px,
+    transparent 0
+  );
+  background-size: 64px 64px;
+  background-position: -64px -64px;
+}
+
+// File: app/layout.tsx
+import type { Metadata } from 'next';
+import localFont from 'next/font/local';
+import { Fraunces } from 'next/font/google';
+
+const geist = localFont({
+  src: '../../public/fonts/Geist-Variable.woff2',
+  display: 'swap',
+  variable: '--font-geist',
+});
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-fraunces',
+});
+
+import './globals.css';
+
+export const metadata: Metadata = {
+  title: 'Create Next App',
+  description: 'Generated by create next app',
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang='en' className={`${geist.variable} ${fraunces.variable}`}>
+      <body className=''>{children}</body>
+    </html>
+  );
+}
+
+// File: app/login/actions.ts
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+import { createClient } from '@/utils/supabase/server';
+
+export async function login(formData: FormData) {
+  const supabase = createClient();
+
+  // type-casting here for convenience
+  // in practice, you should validate your inputs
+  const data = {
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  };
+
+  const { error } = await supabase.auth.signInWithPassword(data);
+
+  if (error) {
+    redirect('/error');
+  }
+
+  revalidatePath('/', 'layout');
+  redirect('/');
+}
+
+export async function signup(formData: FormData) {
+  const supabase = createClient();
+
+  // type-casting here for convenience
+  // in practice, you should validate your inputs
+  const data = {
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  };
+
+  const { error } = await supabase.auth.signUp(data);
+
+  if (error) {
+    redirect('/error');
+  }
+
+  revalidatePath('/', 'layout');
+  redirect('/');
+}
+
+// File: app/login/page.tsx
+import { login, signup } from './actions';
+
+export default function LoginPage() {
+  return (
+    <form>
+      <label htmlFor='email'>Email:</label>
+      <input id='email' name='email' type='email' required />
+      <label htmlFor='password'>Password:</label>
+      <input id='password' name='password' type='password' required />
+      <button formAction={login}>Log in</button>
+      <button formAction={signup}>Sign up</button>
+    </form>
+  );
+}
+
+// File: app/page.tsx
+import TaskList from '@/components/task-list';
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
+
+const tasks = [
+  {
+    id: '1234',
+    title: 'Create TaskList',
+  },
+  {
+    id: '4321',
+    title: 'Design Task Item',
+  },
+];
+
+export default async function Home() {
+  const supabase = createClient();
+  // const { data, error } = await supabase.auth.signInAnonymously();
+
+  return (
+    <main className='flex h-screen w-screen items-center justify-center overflow-hidden p-8 font-sans'>
+      <div className='flex h-full w-full max-w-screen-2xl flex-col items-center gap-6 border p-8'>
+        <h1 className='w-full text-left font-serif text-8xl font-thin leading-none'>
+          Good
+          <br /> Morning
+        </h1>
+        <TaskList tasks={tasks} />
+      </div>
+    </main>
+  );
+}
+
+// File: utils/supabase/client.ts
+import { createBrowserClient } from '@supabase/ssr';
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+}
+
+// File: utils/supabase/middleware.ts
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
+
+export async function updateSession(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+        },
+      },
+    },
+  );
+
+  await supabase.auth.getUser();
+
+  return response;
+}
+
+// File: utils/supabase/server.ts
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+
+export function createClient() {
+  const cookieStore = cookies();
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value, ...options });
+          } catch (error) {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options });
+          } catch (error) {
+            // The `delete` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    },
+  );
+}
+
