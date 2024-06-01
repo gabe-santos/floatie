@@ -13,7 +13,7 @@ export default function Task({ task }) {
   const titleStyles = isComplete ? 'opacity-50 line-through' : '';
 
   return (
-    <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-10 px-2 py-1 transition-opacity hover:border-opacity-75'>
+    <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-10 bg-white px-2 py-1 transition-opacity hover:border-opacity-75'>
       <Button
         onClick={handleMarkComplete}
         variant={'outline'}

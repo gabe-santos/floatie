@@ -1,4 +1,6 @@
 import TaskList from '@/components/task-list';
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 
 const tasks = [
   {
@@ -11,11 +13,17 @@ const tasks = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const supabase = createClient();
+  // const { data, error } = await supabase.auth.signInAnonymously();
+
   return (
     <main className='flex h-screen w-screen items-center justify-center overflow-hidden p-8 font-sans'>
-      <div className='flex h-full w-full max-w-screen-lg flex-col items-center border'>
-        <div className='text-left text-xl'>Tasks</div>
+      <div className='flex h-full w-full max-w-screen-2xl flex-col items-center gap-6 border p-8'>
+        <h1 className='w-full text-left font-serif text-8xl font-thin leading-none'>
+          Good
+          <br /> Morning
+        </h1>
         <TaskList tasks={tasks} />
       </div>
     </main>

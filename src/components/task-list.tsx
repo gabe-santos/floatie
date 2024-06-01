@@ -89,7 +89,7 @@ const NewTaskButton = ({ creatingTask, handleToggleNewTask, handleCancel }) => {
   }, [creatingTask]);
 
   return (
-    <div className='w-full'>
+    <div className='w-full bg-white'>
       {creatingTask ? (
         <form
           action='#'
