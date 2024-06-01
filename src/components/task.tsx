@@ -34,7 +34,7 @@ export default function Task({ task }: TaskProps) {
         <EditTaskForm
           handleSubmit={(e) => {
             e.preventDefault();
-            setIsEditing(false);
+            setIsEditing(false); // Replace with actual update task logic
           }}
           setTaskInput={() => {}}
           inputRef={{ current: null }}

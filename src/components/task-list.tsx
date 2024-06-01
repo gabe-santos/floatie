@@ -6,8 +6,13 @@ import { Button } from './ui/button';
 import { PlusCircle } from 'lucide-react';
 import EditTaskForm from './edit-task';
 
+interface Task {
+  id: number;
+  title: string;
+}
+
 interface TaskListProps {
-  tasks: { id: number; title: string }[];
+  tasks: Task[];
 }
 
 export default function TaskList({ tasks }: TaskListProps) {
@@ -31,7 +36,7 @@ export default function TaskList({ tasks }: TaskListProps) {
     e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
   ) => {
     e.preventDefault();
-    console.log(taskInput);
+    console.log(taskInput); // You should replace this with your actual add task logic
     setEditingTask(false);
     setTaskInput('');
   };
@@ -42,19 +47,22 @@ export default function TaskList({ tasks }: TaskListProps) {
     }
   }, [editingTask]);
 
-  const handleClickOutside = (e: MouseEvent) => {
-    if (newTaskRef.current && !newTaskRef.current.contains(e.target as Node)) {
-      handleCancel();
-    }
-  };
-
-  const handleEscKey = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      handleCancel();
-    }
-  };
-
   useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        newTaskRef.current &&
+        !newTaskRef.current.contains(e.target as Node)
+      ) {
+        handleCancel();
+      }
+    };
+
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleCancel();
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscKey);
 
@@ -83,7 +91,6 @@ export default function TaskList({ tasks }: TaskListProps) {
           handleEnter={handleEnter}
           handleCancel={handleCancel}
           taskInput={taskInput}
-          setEditingTask={setEditingTask}
         />
       ) : (
         <Button

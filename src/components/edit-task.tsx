@@ -11,7 +11,6 @@ interface EditTaskFormProps {
   handleEnter: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   handleCancel: () => void;
   taskInput: string;
-  setEditingTask: (editing: boolean) => void;
 }
 
 const EditTaskForm = forwardRef<HTMLInputElement, EditTaskFormProps>(
