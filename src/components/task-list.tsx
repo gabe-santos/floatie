@@ -5,14 +5,10 @@ import Task from './task';
 import { Button } from './ui/button';
 import { PlusCircle } from 'lucide-react';
 import EditTaskForm from './edit-task';
-
-interface Task {
-  id: number;
-  title: string;
-}
+import { TaskType } from '@/types/task';
 
 interface TaskListProps {
-  tasks: Task[];
+  tasks: TaskType[];
 }
 
 export default function TaskList({ tasks }: TaskListProps) {

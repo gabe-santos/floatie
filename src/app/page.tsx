@@ -1,25 +1,44 @@
 import Greeting from '@/components/greeting';
 import TaskList from '@/components/task-list';
+import { TaskType } from '@/types/task';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
-const tasks = [
+const tasks: TaskType[] = [
   {
-    id: '1234',
-    title: 'Create TaskList',
+    completed: false,
+    created_at: '2024-06-01T08:00:00Z',
+    due_date: '2024-06-10T08:00:00Z',
+    id: 1,
+    timer_duration: 120,
+    title: 'Complete project documentation',
+    priority_lvl: null,
   },
   {
-    id: '4321',
-    title: 'Design Task Item',
+    completed: true,
+    created_at: '2024-05-20T08:00:00Z',
+    due_date: null,
+    id: 2,
+    timer_duration: null,
+    title: 'Review code for new feature',
+    priority_lvl: 'Urgent',
+  },
+  {
+    completed: false,
+    created_at: '2024-06-03T08:00:00Z',
+    due_date: '2024-06-05T08:00:00Z',
+    id: 3,
+    timer_duration: 60,
+    title: 'Prepare presentation for meeting',
+    priority_lvl: 'Medium',
   },
 ];
 
 export default async function Home() {
   const supabase = createClient();
 
-  let { data: tasks, error } = await supabase.from('tasks').select('*');
+  // let { data: tasks, error } = await supabase.from('tasks').select('*');
 
-  console.log(tasks);
   // const { data, error } = await supabase.auth.signInAnonymously();
 
   return (
