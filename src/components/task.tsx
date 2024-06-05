@@ -65,6 +65,12 @@ export default function Task({ task }: TaskProps) {
           >
             {task.title}
           </span>
+          <span className='rounded bg-slate-600 px-1 opacity-30'>
+            {task.due_date ? task.due_date : ''}
+          </span>
+          <span className='opacity-30'>
+            {task.timer_duration ? task.timer_duration : ''}
+          </span>
           <DropdownMenu>
             <DropdownMenuTrigger className='opacity-0 group-hover/li:opacity-80'>
               <Ellipsis className='' />

@@ -16,6 +16,10 @@ const tasks = [
 
 export default async function Home() {
   const supabase = createClient();
+
+  let { data: tasks, error } = await supabase.from('tasks').select('*');
+
+  console.log(tasks);
   // const { data, error } = await supabase.auth.signInAnonymously();
 
   return (
