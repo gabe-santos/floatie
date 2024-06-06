@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from './ui/dropdown-menu';
-import EditTaskForm from './edit-task';
+import TaskForm from './task-form';
 import { TaskType } from '@/types/task';
 
 interface TaskProps {
@@ -34,7 +34,7 @@ export default function Task({ task, updateTask }: TaskProps) {
   return (
     <div>
       {isEditing ? (
-        <EditTaskForm
+        <TaskForm
           handleSubmit={(e) => {
             e.preventDefault();
             setIsEditing(false); // Replace with actual update task logic

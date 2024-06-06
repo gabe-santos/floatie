@@ -10,7 +10,7 @@ import {
 import Task from './task';
 import { Button } from './ui/button';
 import { PlusCircle } from 'lucide-react';
-import EditTaskForm from './edit-task';
+import TaskForm from './task-form';
 import { TaskType } from '@/types/task';
 import { useEffect, useRef, useState } from 'react';
 
@@ -120,7 +120,7 @@ export default function TaskList() {
       </ul>
 
       {editingTask ? (
-        <EditTaskForm
+        <TaskForm
           handleSubmit={handleSubmit}
           setTaskInput={setTaskInput}
           inputRef={inputRef}

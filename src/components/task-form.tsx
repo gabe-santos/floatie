@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
-interface EditTaskFormProps {
+interface TaskFormProps {
   handleSubmit: (
     e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
   ) => void;
@@ -13,7 +13,7 @@ interface EditTaskFormProps {
   taskInput: string;
 }
 
-const EditTaskForm = forwardRef<HTMLInputElement, EditTaskFormProps>(
+const TaskForm = forwardRef<HTMLInputElement, TaskFormProps>(
   (
     {
       handleSubmit,
@@ -49,6 +49,6 @@ const EditTaskForm = forwardRef<HTMLInputElement, EditTaskFormProps>(
   },
 );
 
-EditTaskForm.displayName = 'EditTaskForm';
+TaskForm.displayName = 'TaskForm';
 
-export default EditTaskForm;
+export default TaskForm;
