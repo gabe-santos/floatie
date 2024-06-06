@@ -1,21 +1,52 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  fetchTasks,
+  addTask,
+  updateTask,
+  deleteTask,
+} from '../utils/services/taskService';
 import Task from './task';
 import { Button } from './ui/button';
 import { PlusCircle } from 'lucide-react';
 import EditTaskForm from './edit-task';
 import { TaskType } from '@/types/task';
+import { useEffect, useRef, useState } from 'react';
 
-interface TaskListProps {
-  tasks: TaskType[];
-}
-
-export default function TaskList({ tasks }: TaskListProps) {
+export default function TaskList() {
+  const queryClient = useQueryClient();
   const [editingTask, setEditingTask] = useState(false);
   const [taskInput, setTaskInput] = useState('');
   const newTaskRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    data: tasks,
+    error,
+    isLoading,
+  } = useQuery({ queryKey: ['tasks'], queryFn: fetchTasks });
+
+  const addTaskMutation = useMutation({
+    mutationFn: addTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: updateTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: deleteTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
 
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -32,7 +63,16 @@ export default function TaskList({ tasks }: TaskListProps) {
     e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
   ) => {
     e.preventDefault();
-    console.log(taskInput); // You should replace this with your actual add task logic
+    const newTask: TaskType = {
+      id: Math.random() * 1000,
+      title: taskInput,
+      completed: false,
+      due_date: null,
+      priority_lvl: null,
+      timer_duration: null,
+      created_at: Date.now().toString(),
+    };
+    addTaskMutation.mutate(newTask);
     setEditingTask(false);
     setTaskInput('');
   };
@@ -74,9 +114,7 @@ export default function TaskList({ tasks }: TaskListProps) {
       ref={newTaskRef}
     >
       <ul className='flex flex-col gap-2'>
-        {tasks.map((t) => (
-          <Task task={t} key={t.id} />
-        ))}
+        {tasks?.map((t) => <Task task={t} key={t.id} />)}
       </ul>
 
       {editingTask ? (
