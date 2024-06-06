@@ -35,7 +35,7 @@ const tasks: TaskType[] = [
 ];
 
 export default async function Home() {
-  const supabase = createClient();
+  // const supabase = createClient();
 
   // let { data: tasks, error } = await supabase.from('tasks').select('*');
 
