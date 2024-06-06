@@ -114,7 +114,9 @@ export default function TaskList() {
       ref={newTaskRef}
     >
       <ul className='flex flex-col gap-2'>
-        {tasks?.map((t) => <Task task={t} key={t.id} />)}
+        {tasks?.map((t) => (
+          <Task task={t} updateTask={updateTaskMutation} key={t.id} />
+        ))}
       </ul>
 
       {editingTask ? (

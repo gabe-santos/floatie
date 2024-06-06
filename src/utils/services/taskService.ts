@@ -1,6 +1,6 @@
 import { TaskType } from '@/types/task';
 
-const TASKS_KEY = 'tasks';
+const TASKS_KEY = 'floatie-tasks';
 
 export const fetchTasks = async (): Promise<TaskType[]> => {
   const tasks = localStorage.getItem(TASKS_KEY);

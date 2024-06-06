@@ -9,16 +9,19 @@ import {
   DropdownMenuItem,
 } from './ui/dropdown-menu';
 import EditTaskForm from './edit-task';
+import { TaskType } from '@/types/task';
 
 interface TaskProps {
-  task: { id: number; title: string };
+  task: TaskType;
+  updateTask: any;
 }
 
-export default function Task({ task }: TaskProps) {
+export default function Task({ task, updateTask }: TaskProps) {
   const [isComplete, setIsComplete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleMarkComplete = () => {
+    updateTask.mutate({ ...task, completed: !isComplete });
     setIsComplete(!isComplete);
   };
 
