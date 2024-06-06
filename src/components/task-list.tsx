@@ -64,7 +64,7 @@ export default function TaskList() {
   ) => {
     e.preventDefault();
     const newTask: TaskType = {
-      id: Math.random() * 1000,
+      id: Math.floor(Math.random() * 1000),
       title: taskInput,
       completed: false,
       due_date: null,
