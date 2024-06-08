@@ -1,4 +1,4 @@
-import { Check, Ellipsis } from 'lucide-react';
+import { Check, Ellipsis, Pencil } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -65,7 +65,6 @@ export default function Task({ task }: TaskProps) {
           setTaskInput={setTaskInput}
           handleSubmit={handleSubmit}
           handleCancel={handleCancel}
-          inputRef={null}
         />
       ) : (
         <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-2 py-1 transition-opacity hover:border-opacity-20'>
@@ -93,6 +92,7 @@ export default function Task({ task }: TaskProps) {
             {task.due_date || ''}
           </span>
           <span className='opacity-30'>{task.timer_duration || ''}</span>
+          <EditBtn onClick={handleEditTask} />
           <DropdownMenu>
             <DropdownMenuTrigger className='opacity-0 group-hover/li:opacity-80'>
               <Ellipsis />
@@ -109,3 +109,12 @@ export default function Task({ task }: TaskProps) {
     </div>
   );
 }
+
+const EditBtn = ({ onClick }) => {
+  return (
+    <Pencil
+      onClick={onClick}
+      className='opacity-0 hover:opacity-100 group-hover/li:opacity-25'
+    />
+  );
+};

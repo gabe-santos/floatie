@@ -102,7 +102,6 @@ export default function TaskList() {
           setTaskInput={setTaskInput}
           handleSubmit={handleSubmit}
           handleCancel={handleCancel}
-          inputRef={inputRef}
         />
       ) : (
         <Button
