@@ -13,19 +13,19 @@ import { PlusCircle } from 'lucide-react';
 import TaskForm from './task-form';
 import { TaskType } from '@/types/task';
 import { useEffect, useRef, useState } from 'react';
+import { useTaskStore } from '@/app/store/useTaskStore';
 
 export default function TaskList() {
   const queryClient = useQueryClient();
-  const [editingTask, setEditingTask] = useState(false);
-  const [taskInput, setTaskInput] = useState('');
-  const newTaskRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { tasks, setTasks, setTaskInput, taskInput } = useTaskStore();
 
-  const {
-    data: tasks,
-    error,
-    isLoading,
-  } = useQuery({ queryKey: ['tasks'], queryFn: fetchTasks });
+  const [isEditing, setIsEditing] = useState(false);
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: fetchTasks,
+    onSuccess: (data) => setTasks(data),
+  });
 
   const addTaskMutation = useMutation({
     mutationFn: addTask,
@@ -48,6 +48,9 @@ export default function TaskList() {
     },
   });
 
+  const newTaskRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSubmit(e);
@@ -55,7 +58,7 @@ export default function TaskList() {
   };
 
   const handleCancel = () => {
-    setEditingTask(false);
+    setIsEditing(false);
     setTaskInput('');
   };
 
@@ -73,15 +76,15 @@ export default function TaskList() {
       created_at: Date.now().toString(),
     };
     addTaskMutation.mutate(newTask);
-    setEditingTask(false);
+    setIsEditing(false);
     setTaskInput('');
   };
 
   useEffect(() => {
-    if (editingTask && inputRef.current) {
+    if (isEditing && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [editingTask]);
+  }, [isEditing]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -114,25 +117,24 @@ export default function TaskList() {
       ref={newTaskRef}
     >
       <ul className='flex flex-col gap-2'>
-        {tasks?.map((t) => (
-          <Task task={t} updateTask={updateTaskMutation} key={t.id} />
-        ))}
+        {data?.map((t) => <Task task={t} key={t.id} />)}
       </ul>
 
-      {editingTask ? (
+      {isEditing ? (
         <TaskForm
           handleSubmit={handleSubmit}
-          setTaskInput={setTaskInput}
           inputRef={inputRef}
           handleEnter={handleEnter}
           handleCancel={handleCancel}
-          taskInput={taskInput}
         />
       ) : (
         <Button
           variant='ghost'
           className='flex h-full w-full items-center gap-2 border border-black border-opacity-0 px-2 hover:border-opacity-100'
-          onClick={() => setEditingTask(true)}
+          onClick={() => {
+            setIsEditing(true);
+            setTaskInput('');
+          }}
         >
           <PlusCircle size={24} />
           <span className='flex-1 text-left'>New Task</span>

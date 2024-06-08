@@ -1,6 +1,5 @@
 import { Check, Ellipsis } from 'lucide-react';
 import { Button } from './ui/button';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -8,25 +7,52 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from './ui/dropdown-menu';
+import { useTaskStore } from '@/app/store/useTaskStore';
 import TaskForm from './task-form';
 import { TaskType } from '@/types/task';
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateTask as updateTaskService } from '../utils/services/taskService';
 
 interface TaskProps {
   task: TaskType;
-  updateTask: any;
 }
 
-export default function Task({ task, updateTask }: TaskProps) {
-  const [isComplete, setIsComplete] = useState(false);
+export default function Task({ task }: TaskProps) {
+  // const { setTaskInput, updateTask } = useTaskStore();
+  const [isComplete, setIsComplete] = useState(task.completed);
+  const [taskTitle, setTaskTitle] = useState(task.title);
   const [isEditing, setIsEditing] = useState(false);
+  const queryClient = useQueryClient();
+
+  const updateTaskMutation = useMutation({
+    mutationFn: updateTaskService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
 
   const handleMarkComplete = () => {
-    updateTask.mutate({ ...task, completed: !isComplete });
+    const updatedTask = { ...task, completed: !isComplete };
     setIsComplete(!isComplete);
+    updateTaskMutation.mutate(updatedTask);
+  };
+
+  const handleSubmit = (
+    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    e.preventDefault();
+    updateTaskMutation.mutate({ ...task, title: taskTitle });
+    setIsEditing(false);
   };
 
   const handleEditTask = () => {
     setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setTaskTitle(task.title);
+    setIsEditing(false);
   };
 
   const titleStyles = isComplete ? 'opacity-50 line-through' : '';
@@ -35,22 +61,16 @@ export default function Task({ task, updateTask }: TaskProps) {
     <div>
       {isEditing ? (
         <TaskForm
-          handleSubmit={(e) => {
-            e.preventDefault();
-            setIsEditing(false); // Replace with actual update task logic
-          }}
-          setTaskInput={() => {}}
-          inputRef={{ current: null }}
+          handleSubmit={handleSubmit}
+          inputRef={null}
           handleEnter={() => {}}
-          handleCancel={() => setIsEditing(false)}
-          taskInput={task.title}
-          setEditingTask={setIsEditing}
+          handleCancel={handleCancel}
         />
       ) : (
         <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-2 py-1 transition-opacity hover:border-opacity-20'>
           <Button
             onClick={handleMarkComplete}
-            variant={'outline'}
+            variant='outline'
             role='checkbox'
             className='transparent group/button flex h-6 w-6 items-center justify-center rounded-full p-0'
           >
@@ -69,14 +89,12 @@ export default function Task({ task, updateTask }: TaskProps) {
             {task.title}
           </span>
           <span className='rounded bg-slate-600 px-1 opacity-30'>
-            {task.due_date ? task.due_date : ''}
+            {task.due_date || ''}
           </span>
-          <span className='opacity-30'>
-            {task.timer_duration ? task.timer_duration : ''}
-          </span>
+          <span className='opacity-30'>{task.timer_duration || ''}</span>
           <DropdownMenu>
             <DropdownMenuTrigger className='opacity-0 group-hover/li:opacity-80'>
-              <Ellipsis className='' />
+              <Ellipsis />
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='cursor-pointer'>
               <DropdownMenuItem onClick={handleEditTask}>Edit</DropdownMenuItem>
