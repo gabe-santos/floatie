@@ -7,7 +7,6 @@ interface TaskFormProps {
   setTaskInput: (input: string) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   handleCancel: () => void;
-  inputRef?: React.RefObject<HTMLInputElement>;
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({
@@ -15,7 +14,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
   setTaskInput,
   handleSubmit,
   handleCancel,
-  inputRef,
 }) => {
   const onEnter = (e) => {
     if (e.key === 'Enter') handleSubmit(e);
@@ -27,7 +25,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
         value={taskInput}
         onKeyDown={onEnter}
         onChange={(e) => setTaskInput(e.target.value)}
-        ref={inputRef}
         type='text'
         className=''
       />
