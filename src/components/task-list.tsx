@@ -1,27 +1,25 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  fetchTasks,
-  addTask,
-  updateTask,
-  deleteTask,
-} from '../utils/services/taskService';
+import { fetchTasks, addTask } from '../utils/services/taskService';
 import Task from './task';
 import { Button } from './ui/button';
 import { PlusCircle } from 'lucide-react';
 import TaskForm from './task-form';
 import { TaskType } from '@/types/task';
 import { useEffect, useRef, useState } from 'react';
-import { useTaskStore } from '@/app/store/useTaskStore';
 
 export default function TaskList() {
   const queryClient = useQueryClient();
-  const { tasks, setTasks, setTaskInput, taskInput } = useTaskStore();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [taskInput, setTaskInput] = useState('');
 
-  const { data, error, isLoading } = useQuery({
+  const {
+    data: tasks,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: ['tasks'],
     queryFn: fetchTasks,
     onSuccess: (data) => setTasks(data),
@@ -34,37 +32,10 @@ export default function TaskList() {
     },
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: updateTask,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    },
-  });
-
-  const deleteTaskMutation = useMutation({
-    mutationFn: deleteTask,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    },
-  });
-
   const newTaskRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSubmit(e);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setTaskInput('');
-  };
-
-  const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
-  ) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newTask: TaskType = {
       id: Math.floor(Math.random() * 1000),
@@ -76,6 +47,11 @@ export default function TaskList() {
       created_at: Date.now().toString(),
     };
     addTaskMutation.mutate(newTask);
+    setIsEditing(false);
+    setTaskInput('');
+  };
+
+  const handleCancel = () => {
     setIsEditing(false);
     setTaskInput('');
   };
@@ -117,15 +93,16 @@ export default function TaskList() {
       ref={newTaskRef}
     >
       <ul className='flex flex-col gap-2'>
-        {data?.map((t) => <Task task={t} key={t.id} />)}
+        {tasks?.map((t) => <Task task={t} key={t.id} />)}
       </ul>
 
       {isEditing ? (
         <TaskForm
+          taskInput={taskInput}
+          setTaskInput={setTaskInput}
           handleSubmit={handleSubmit}
-          inputRef={inputRef}
-          handleEnter={handleEnter}
           handleCancel={handleCancel}
+          inputRef={inputRef}
         />
       ) : (
         <Button

@@ -1,34 +1,32 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { useTaskStore } from '@/app/store/useTaskStore';
 
 interface TaskFormProps {
-  handleSubmit: (
-    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
-  ) => void;
-  inputRef: React.RefObject<HTMLInputElement>;
-  handleEnter: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  taskInput: string;
+  setTaskInput: (input: string) => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   handleCancel: () => void;
+  inputRef?: React.RefObject<HTMLInputElement>;
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({
+  taskInput,
+  setTaskInput,
   handleSubmit,
-  inputRef,
-  handleEnter,
   handleCancel,
+  inputRef,
 }) => {
-  const { taskInput, setTaskInput } = useTaskStore();
+  const onEnter = (e) => {
+    if (e.key === 'Enter') handleSubmit(e);
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className='flex flex-col gap-4 rounded-xl border border-black px-6 py-4'
-    >
+    <div className='flex flex-col gap-4 rounded-xl border border-black px-6 py-4'>
       <Input
         value={taskInput}
+        onKeyDown={onEnter}
         onChange={(e) => setTaskInput(e.target.value)}
-        onKeyDown={handleEnter}
         ref={inputRef}
         type='text'
         className=''
@@ -37,9 +35,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
         <Button variant='secondary' onClick={handleCancel}>
           Cancel
         </Button>
-        <Button type='submit'>Save</Button>
+        <Button onClick={handleSubmit} type='submit'>
+          Save
+        </Button>
       </div>
-    </form>
+    </div>
   );
 };
 

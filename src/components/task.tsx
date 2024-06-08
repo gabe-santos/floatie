@@ -7,7 +7,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from './ui/dropdown-menu';
-import { useTaskStore } from '@/app/store/useTaskStore';
 import TaskForm from './task-form';
 import { TaskType } from '@/types/task';
 import { useState } from 'react';
@@ -19,10 +18,9 @@ interface TaskProps {
 }
 
 export default function Task({ task }: TaskProps) {
-  // const { setTaskInput, updateTask } = useTaskStore();
   const [isComplete, setIsComplete] = useState(task.completed);
-  const [taskTitle, setTaskTitle] = useState(task.title);
   const [isEditing, setIsEditing] = useState(false);
+  const [taskInput, setTaskInput] = useState(task.title);
   const queryClient = useQueryClient();
 
   const updateTaskMutation = useMutation({
@@ -34,24 +32,26 @@ export default function Task({ task }: TaskProps) {
 
   const handleMarkComplete = () => {
     const updatedTask = { ...task, completed: !isComplete };
-    setIsComplete(!isComplete);
-    updateTaskMutation.mutate(updatedTask);
-  };
-
-  const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
-  ) => {
-    e.preventDefault();
-    updateTaskMutation.mutate({ ...task, title: taskTitle });
-    setIsEditing(false);
+    updateTaskMutation.mutate(updatedTask, {
+      onSuccess: () => {
+        setIsComplete(!isComplete);
+      },
+    });
   };
 
   const handleEditTask = () => {
+    setTaskInput(task.title);
     setIsEditing(true);
   };
 
   const handleCancel = () => {
-    setTaskTitle(task.title);
+    setTaskInput(task.title);
+    setIsEditing(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    updateTaskMutation.mutate({ ...task, title: taskInput });
     setIsEditing(false);
   };
 
@@ -61,10 +61,11 @@ export default function Task({ task }: TaskProps) {
     <div>
       {isEditing ? (
         <TaskForm
+          taskInput={taskInput}
+          setTaskInput={setTaskInput}
           handleSubmit={handleSubmit}
-          inputRef={null}
-          handleEnter={() => {}}
           handleCancel={handleCancel}
+          inputRef={null}
         />
       ) : (
         <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-2 py-1 transition-opacity hover:border-opacity-20'>
