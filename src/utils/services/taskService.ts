@@ -11,6 +11,7 @@ export const addTask = async (task: TaskType): Promise<TaskType> => {
   const tasks = await fetchTasks();
   tasks.push(task);
   localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  console.log('task:', task.title, 'added');
   return task;
 };
 
@@ -19,6 +20,7 @@ export const updateTask = async (updatedTask: TaskType): Promise<TaskType> => {
   const taskIndex = tasks.findIndex((task) => task.id === updatedTask.id);
   tasks[taskIndex] = updatedTask;
   localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  console.log(updatedTask, ' successfully updated');
   return updatedTask;
 };
 

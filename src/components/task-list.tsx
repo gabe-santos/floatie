@@ -1,12 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  fetchTasks,
-  addTask,
-  updateTask,
-  deleteTask,
-} from '../utils/services/taskService';
+import { fetchTasks, addTask } from '../utils/services/taskService';
 import Task from './task';
 import { Button } from './ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -16,16 +11,19 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function TaskList() {
   const queryClient = useQueryClient();
-  const [editingTask, setEditingTask] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
   const [taskInput, setTaskInput] = useState('');
-  const newTaskRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     data: tasks,
     error,
     isLoading,
-  } = useQuery({ queryKey: ['tasks'], queryFn: fetchTasks });
+  } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: fetchTasks,
+    onSuccess: (data) => setTasks(data),
+  });
 
   const addTaskMutation = useMutation({
     mutationFn: addTask,
@@ -34,34 +32,10 @@ export default function TaskList() {
     },
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: updateTask,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    },
-  });
+  const newTaskRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const deleteTaskMutation = useMutation({
-    mutationFn: deleteTask,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    },
-  });
-
-  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSubmit(e);
-    }
-  };
-
-  const handleCancel = () => {
-    setEditingTask(false);
-    setTaskInput('');
-  };
-
-  const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
-  ) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newTask: TaskType = {
       id: Math.floor(Math.random() * 1000),
@@ -73,15 +47,20 @@ export default function TaskList() {
       created_at: Date.now().toString(),
     };
     addTaskMutation.mutate(newTask);
-    setEditingTask(false);
+    setIsEditing(false);
+    setTaskInput('');
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
     setTaskInput('');
   };
 
   useEffect(() => {
-    if (editingTask && inputRef.current) {
+    if (isEditing && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [editingTask]);
+  }, [isEditing]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -114,25 +93,25 @@ export default function TaskList() {
       ref={newTaskRef}
     >
       <ul className='flex flex-col gap-2'>
-        {tasks?.map((t) => (
-          <Task task={t} updateTask={updateTaskMutation} key={t.id} />
-        ))}
+        {tasks?.map((t) => <Task task={t} key={t.id} />)}
       </ul>
 
-      {editingTask ? (
+      {isEditing ? (
         <TaskForm
-          handleSubmit={handleSubmit}
-          setTaskInput={setTaskInput}
-          inputRef={inputRef}
-          handleEnter={handleEnter}
-          handleCancel={handleCancel}
           taskInput={taskInput}
+          setTaskInput={setTaskInput}
+          handleSubmit={handleSubmit}
+          handleCancel={handleCancel}
+          inputRef={inputRef}
         />
       ) : (
         <Button
           variant='ghost'
           className='flex h-full w-full items-center gap-2 border border-black border-opacity-0 px-2 hover:border-opacity-100'
-          onClick={() => setEditingTask(true)}
+          onClick={() => {
+            setIsEditing(true);
+            setTaskInput('');
+          }}
         >
           <PlusCircle size={24} />
           <span className='flex-1 text-left'>New Task</span>
