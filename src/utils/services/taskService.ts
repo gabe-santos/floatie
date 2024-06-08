@@ -28,4 +28,5 @@ export const deleteTask = async (taskId: number): Promise<void> => {
   let tasks = await fetchTasks();
   tasks = tasks.filter((task) => task.id !== taskId);
   localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  console.log(`Deleted task "${taskId}"`);
 };

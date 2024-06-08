@@ -11,7 +11,10 @@ import TaskForm from './task-form';
 import { TaskType } from '@/types/task';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateTask as updateTaskService } from '../utils/services/taskService';
+import {
+  deleteTask,
+  updateTask as updateTaskService,
+} from '../utils/services/taskService';
 
 interface TaskProps {
   task: TaskType;
@@ -30,6 +33,13 @@ export default function Task({ task }: TaskProps) {
     },
   });
 
+  const deleteTaskMutation = useMutation({
+    mutationFn: deleteTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
   const handleMarkComplete = () => {
     const updatedTask = { ...task, completed: !isComplete };
     updateTaskMutation.mutate(updatedTask, {
@@ -42,6 +52,10 @@ export default function Task({ task }: TaskProps) {
   const handleEditTask = () => {
     setTaskInput(task.title);
     setIsEditing(true);
+  };
+
+  const handleDeleteTask = () => {
+    deleteTaskMutation.mutate(task.id);
   };
 
   const handleCancel = () => {
@@ -99,7 +113,10 @@ export default function Task({ task }: TaskProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='cursor-pointer'>
               <DropdownMenuItem onClick={handleEditTask}>Edit</DropdownMenuItem>
-              <DropdownMenuItem className='text-red-600'>
+              <DropdownMenuItem
+                onClick={handleDeleteTask}
+                className='text-red-600'
+              >
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
