@@ -55,71 +55,92 @@ export default function Greeting() {
 }
 
 // File: components/task-form.tsx
-import { forwardRef } from 'react';
+import React from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+} from './ui/select';
+import { TaskType } from '../types/task';
 
 interface TaskFormProps {
-  handleSubmit: (
-    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
-  ) => void;
-  setTaskInput: (value: string) => void;
-  inputRef: React.RefObject<HTMLInputElement>;
-  handleEnter: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  taskState: TaskType;
+  setTaskState: (t: TaskType) => void;
+  setTaskInput?: (input: string) => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   handleCancel: () => void;
-  taskInput: string;
 }
 
-const TaskForm = forwardRef<HTMLInputElement, TaskFormProps>(
-  (
-    {
-      handleSubmit,
-      setTaskInput,
-      inputRef,
-      handleEnter,
-      handleCancel,
-      taskInput,
-    },
-    ref,
-  ) => {
-    return (
-      <form
-        onSubmit={handleSubmit}
-        className='flex flex-col gap-4 rounded-xl border border-black px-6 py-4'
-      >
-        <Input
-          value={taskInput}
-          onChange={(e) => setTaskInput(e.target.value)}
-          onKeyDown={handleEnter}
-          ref={inputRef}
-          type='text'
-          className=''
-        />
+export default function TaskForm({
+  taskState,
+  setTaskState,
+  setTaskInput,
+  handleSubmit,
+  handleCancel,
+}: TaskFormProps) {
+  const onEnter = (e) => {
+    if (e.key === 'Enter') handleSubmit(e);
+  };
+
+  const handleChange = (e) => {
+    // const updatedTask = {...initialTask, title: e.target.value}
+    // setInitialTask({...task, })
+    setTaskState({ ...taskState, title: e.target.value });
+  };
+
+  const handlePrioritySelect = (e) => {
+    const newTask: TaskType = { ...taskState, priority_lvl: e };
+    setTaskState(newTask);
+  };
+
+  return (
+    <div className='flex flex-col gap-4 rounded-xl border border-black px-6 py-4'>
+      <Input
+        value={taskState?.title}
+        onKeyDown={onEnter}
+        onChange={handleChange}
+        type='text'
+        className=''
+      />
+      <div className='flex'>
+        <div className='flex w-full justify-start gap-2'>
+          <Select
+            onValueChange={handlePrioritySelect}
+            value={taskState.priority_lvl}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder='Priority' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='Urgent'>Urgent</SelectItem>
+              <SelectItem value='High'>High</SelectItem>
+              <SelectItem value='Medium'>Medium</SelectItem>
+              <SelectItem value='Low'>Low</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className='flex w-full justify-end gap-2'>
           <Button variant='secondary' onClick={handleCancel}>
             Cancel
           </Button>
-          <Button type='submit'>Save</Button>
+          <Button onClick={handleSubmit} type='submit'>
+            Save
+          </Button>
         </div>
-      </form>
-    );
-  },
-);
-
-TaskForm.displayName = 'TaskForm';
-
-export default TaskForm;
+      </div>
+    </div>
+  );
+}
 
 // File: components/task-list.tsx
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  fetchTasks,
-  addTask,
-  updateTask,
-  deleteTask,
-} from '../utils/services/taskService';
+import { fetchTasks, addTask } from '../utils/services/taskService';
 import Task from './task';
 import { Button } from './ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -129,16 +150,28 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function TaskList() {
   const queryClient = useQueryClient();
-  const [editingTask, setEditingTask] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
   const [taskInput, setTaskInput] = useState('');
-  const newTaskRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [newTaskState, setNewTaskState] = useState({
+    id: Math.floor(Math.random() * 1000),
+    title: '',
+    completed: false,
+    due_date: null,
+    priority_lvl: 'Low',
+    timer_duration: 0,
+    created_at: Date.now().toString(),
+  });
 
   const {
     data: tasks,
     error,
     isLoading,
-  } = useQuery({ queryKey: ['tasks'], queryFn: fetchTasks });
+  } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: fetchTasks,
+    onSuccess: (data) => setTasks(data),
+  });
 
   const addTaskMutation = useMutation({
     mutationFn: addTask,
@@ -147,54 +180,43 @@ export default function TaskList() {
     },
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: updateTask,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    },
-  });
+  const newTaskRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const deleteTaskMutation = useMutation({
-    mutationFn: deleteTask,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    },
-  });
-
-  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSubmit(e);
-    }
-  };
-
-  const handleCancel = () => {
-    setEditingTask(false);
-    setTaskInput('');
-  };
-
-  const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>,
-  ) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newTask: TaskType = {
       id: Math.floor(Math.random() * 1000),
-      title: taskInput,
+      title: newTaskState.title,
       completed: false,
-      due_date: null,
-      priority_lvl: null,
-      timer_duration: null,
+      due_date: newTaskState.due_date,
+      priority_lvl: newTaskState.priority_lvl,
+      timer_duration: newTaskState.priority_lvl,
       created_at: Date.now().toString(),
     };
     addTaskMutation.mutate(newTask);
-    setEditingTask(false);
+    setIsEditing(false);
+    setNewTaskState({
+      id: Math.floor(Math.random() * 1000),
+      title: '',
+      completed: false,
+      due_date: null,
+      priority_lvl: 'Low',
+      timer_duration: 0,
+      created_at: Date.now().toString(),
+    });
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
     setTaskInput('');
   };
 
   useEffect(() => {
-    if (editingTask && inputRef.current) {
+    if (isEditing && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [editingTask]);
+  }, [isEditing]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -222,30 +244,27 @@ export default function TaskList() {
   }, []);
 
   return (
-    <div
-      className='flex w-1/2 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'
-      ref={newTaskRef}
-    >
+    <div className='flex w-1/2 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'>
       <ul className='flex flex-col gap-2'>
-        {tasks?.map((t) => (
-          <Task task={t} updateTask={updateTaskMutation} key={t.id} />
-        ))}
+        {tasks?.map((t) => <Task task={t} key={t.id} />)}
       </ul>
 
-      {editingTask ? (
+      {isEditing ? (
         <TaskForm
-          handleSubmit={handleSubmit}
+          taskState={newTaskState}
+          setTaskState={setNewTaskState}
           setTaskInput={setTaskInput}
-          inputRef={inputRef}
-          handleEnter={handleEnter}
+          handleSubmit={handleSubmit}
           handleCancel={handleCancel}
-          taskInput={taskInput}
         />
       ) : (
         <Button
           variant='ghost'
-          className='flex h-full w-full items-center gap-2 border border-black border-opacity-0 px-2 hover:border-opacity-100'
-          onClick={() => setEditingTask(true)}
+          className='flex w-full items-center gap-2 border border-black border-opacity-0 px-2 hover:border-opacity-100'
+          onClick={() => {
+            setIsEditing(true);
+            setTaskInput('');
+          }}
         >
           <PlusCircle size={24} />
           <span className='flex-1 text-left'>New Task</span>
@@ -256,9 +275,8 @@ export default function TaskList() {
 }
 
 // File: components/task.tsx
-import { Check, Ellipsis } from 'lucide-react';
+import { Check, Ellipsis, Pencil } from 'lucide-react';
 import { Button } from './ui/button';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -268,23 +286,66 @@ import {
 } from './ui/dropdown-menu';
 import TaskForm from './task-form';
 import { TaskType } from '@/types/task';
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  deleteTask,
+  updateTask as updateTaskService,
+} from '../utils/services/taskService';
 
 interface TaskProps {
   task: TaskType;
-  updateTask: any;
 }
 
-export default function Task({ task, updateTask }: TaskProps) {
-  const [isComplete, setIsComplete] = useState(false);
+export default function Task({ task }: TaskProps) {
+  const [taskState, setTaskState] = useState<TaskType>(task);
+  const [isComplete, setIsComplete] = useState(task.completed);
   const [isEditing, setIsEditing] = useState(false);
+  // const [taskInput, setTaskInput] = useState(task.title);
+  const queryClient = useQueryClient();
+
+  const updateTaskMutation = useMutation({
+    mutationFn: updateTaskService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: deleteTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
 
   const handleMarkComplete = () => {
-    updateTask.mutate({ ...task, completed: !isComplete });
-    setIsComplete(!isComplete);
+    const updatedTask = { ...task, completed: !isComplete };
+    updateTaskMutation.mutate(updatedTask, {
+      onSuccess: () => {
+        setIsComplete(!isComplete);
+      },
+    });
   };
 
   const handleEditTask = () => {
+    // setTaskInput(task.title);
     setIsEditing(true);
+  };
+
+  const handleDeleteTask = () => {
+    deleteTaskMutation.mutate(task.id);
+  };
+
+  const handleCancel = () => {
+    // setTaskInput(task.title);
+    setIsEditing(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const newTask = taskState;
+    updateTaskMutation.mutate(newTask);
+    setIsEditing(false);
   };
 
   const titleStyles = isComplete ? 'opacity-50 line-through' : '';
@@ -293,22 +354,16 @@ export default function Task({ task, updateTask }: TaskProps) {
     <div>
       {isEditing ? (
         <TaskForm
-          handleSubmit={(e) => {
-            e.preventDefault();
-            setIsEditing(false); // Replace with actual update task logic
-          }}
-          setTaskInput={() => {}}
-          inputRef={{ current: null }}
-          handleEnter={() => {}}
-          handleCancel={() => setIsEditing(false)}
-          taskInput={task.title}
-          setEditingTask={setIsEditing}
+          taskState={taskState}
+          setTaskState={setTaskState}
+          handleSubmit={handleSubmit}
+          handleCancel={handleCancel}
         />
       ) : (
         <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-2 py-1 transition-opacity hover:border-opacity-20'>
           <Button
             onClick={handleMarkComplete}
-            variant={'outline'}
+            variant='outline'
             role='checkbox'
             className='transparent group/button flex h-6 w-6 items-center justify-center rounded-full p-0'
           >
@@ -327,23 +382,205 @@ export default function Task({ task, updateTask }: TaskProps) {
             {task.title}
           </span>
           <span className='rounded bg-slate-600 px-1 opacity-30'>
-            {task.due_date ? task.due_date : ''}
+            {task.due_date || ''}
           </span>
-          <span className='opacity-30'>
-            {task.timer_duration ? task.timer_duration : ''}
-          </span>
+          <span className='opacity-30'>{task.timer_duration || ''}</span>
+          <EditBtn onClick={handleEditTask} />
           <DropdownMenu>
             <DropdownMenuTrigger className='opacity-0 group-hover/li:opacity-80'>
-              <Ellipsis className='' />
+              <Ellipsis />
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='cursor-pointer'>
               <DropdownMenuItem onClick={handleEditTask}>Edit</DropdownMenuItem>
-              <DropdownMenuItem className='text-red-600'>
+              <DropdownMenuItem
+                onClick={handleDeleteTask}
+                className='text-red-600'
+              >
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </li>
+      )}
+    </div>
+  );
+}
+
+const EditBtn = ({ onClick }) => {
+  return (
+    <Pencil
+      onClick={onClick}
+      className='opacity-0 hover:opacity-100 group-hover/li:opacity-25'
+    />
+  );
+};
+
+// File: components/timer.tsx
+import { useEffect, useState, useRef } from 'react';
+import { Button } from './ui/button';
+
+export default function Timer() {
+  const [seconds, setSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputHours, setInputHours] = useState(0);
+  const [inputMinutes, setInputMinutes] = useState(0);
+  const [inputSeconds, setInputSeconds] = useState(0);
+
+  const secondsRef = useRef(seconds);
+  const isRunningRef = useRef(isRunning);
+
+  // Sync refs with state
+  useEffect(() => {
+    secondsRef.current = seconds;
+  }, [seconds]);
+
+  useEffect(() => {
+    isRunningRef.current = isRunning;
+  }, [isRunning]);
+
+  // Decrement timer
+  const tick = () => {
+    if (secondsRef.current > 0) {
+      setSeconds(secondsRef.current - 1);
+    } else {
+      setIsRunning(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isRunning) {
+      const interval = setInterval(tick, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [isRunning]);
+
+  // Function to format timer into hh:mm:ss or mm:ss
+  const formatDuration = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+
+    if (h > 0) {
+      return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    } else {
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+  };
+
+  // Timer Controls
+  const incrementTimer = () => setSeconds(seconds + 60);
+  const decrementTimer = () => {
+    if (seconds >= 60) {
+      setSeconds(seconds - 60);
+    }
+  };
+  const startTimer = () => {
+    setIsRunning(true);
+    isRunningRef.current = true;
+  };
+  const resetTimer = () => {
+    setSeconds(0);
+    setIsRunning(false);
+  };
+  const handlePause = () => {
+    setIsRunning(false);
+  };
+  const handleStop = () => {
+    handlePause();
+    resetTimer();
+  };
+
+  // Function to handle form submission
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const totalSeconds = inputHours * 3600 + inputMinutes * 60 + inputSeconds;
+    setSeconds(totalSeconds);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className='flex h-[300px] w-[300px] flex-col items-center justify-center rounded-xl border bg-white shadow-md'>
+      {isEditing ? (
+        <form
+          onSubmit={handleFormSubmit}
+          className='flex flex-col items-center'
+        >
+          <div className='flex'>
+            <input
+              type='number'
+              value={inputHours}
+              onChange={(e) =>
+                setInputHours(Math.max(0, parseInt(e.target.value) || 0))
+              }
+              className='mx-1 w-12 text-center'
+              min='0'
+            />
+            :
+            <input
+              type='number'
+              value={inputMinutes}
+              onChange={(e) =>
+                setInputMinutes(
+                  Math.max(0, Math.min(59, parseInt(e.target.value) || 0)),
+                )
+              }
+              className='mx-1 w-12 text-center'
+              min='0'
+              max='59'
+            />
+            :
+            <input
+              type='number'
+              value={inputSeconds}
+              onChange={(e) =>
+                setInputSeconds(
+                  Math.max(0, Math.min(59, parseInt(e.target.value) || 0)),
+                )
+              }
+              className='mx-1 w-12 text-center'
+              min='0'
+              max='59'
+            />
+          </div>
+          <Button type='submit'>Set Time</Button>
+        </form>
+      ) : (
+        <h1
+          className='cursor-pointer text-3xl'
+          onClick={() => {
+            setIsEditing(true);
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            setInputHours(h);
+            setInputMinutes(m);
+            setInputSeconds(s);
+          }}
+        >
+          {formatDuration(seconds)}
+        </h1>
+      )}
+      <div className='flex'>
+        <Button variant={'outline'} onClick={decrementTimer}>
+          -
+        </Button>
+        <Button variant={'outline'} onClick={incrementTimer}>
+          +
+        </Button>
+      </div>
+      {isRunning ? (
+        <div className='flex'>
+          <Button onClick={handlePause}>Pause</Button>
+          <Button onClick={handleStop}>Stop</Button>
+        </div>
+      ) : (
+        <div>
+          <Button onClick={startTimer}>Start</Button>
+          <Button onClick={resetTimer} variant={'link'}>
+            Reset
+          </Button>
+        </div>
       )}
     </div>
   );
@@ -636,6 +873,168 @@ Input.displayName = "Input"
 
 export { Input }
 
+// File: components/ui/select.tsx
+"use client"
+
+import * as React from "react"
+import * as SelectPrimitive from "@radix-ui/react-select"
+import { Check, ChevronDown, ChevronUp } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+
+const Select = SelectPrimitive.Root
+
+const SelectGroup = SelectPrimitive.Group
+
+const SelectValue = SelectPrimitive.Value
+
+const SelectTrigger = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus:ring-slate-300",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <SelectPrimitive.Icon asChild>
+      <ChevronDown className="h-4 w-4 opacity-50" />
+    </SelectPrimitive.Icon>
+  </SelectPrimitive.Trigger>
+))
+SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
+
+const SelectScrollUpButton = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollUpButton
+    ref={ref}
+    className={cn(
+      "flex cursor-default items-center justify-center py-1",
+      className
+    )}
+    {...props}
+  >
+    <ChevronUp className="h-4 w-4" />
+  </SelectPrimitive.ScrollUpButton>
+))
+SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
+
+const SelectScrollDownButton = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.ScrollDownButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollDownButton
+    ref={ref}
+    className={cn(
+      "flex cursor-default items-center justify-center py-1",
+      className
+    )}
+    {...props}
+  >
+    <ChevronDown className="h-4 w-4" />
+  </SelectPrimitive.ScrollDownButton>
+))
+SelectScrollDownButton.displayName =
+  SelectPrimitive.ScrollDownButton.displayName
+
+const SelectContent = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+>(({ className, children, position = "popper", ...props }, ref) => (
+  <SelectPrimitive.Portal>
+    <SelectPrimitive.Content
+      ref={ref}
+      className={cn(
+        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-slate-200 bg-white text-slate-950 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50",
+        position === "popper" &&
+          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+        className
+      )}
+      position={position}
+      {...props}
+    >
+      <SelectScrollUpButton />
+      <SelectPrimitive.Viewport
+        className={cn(
+          "p-1",
+          position === "popper" &&
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+        )}
+      >
+        {children}
+      </SelectPrimitive.Viewport>
+      <SelectScrollDownButton />
+    </SelectPrimitive.Content>
+  </SelectPrimitive.Portal>
+))
+SelectContent.displayName = SelectPrimitive.Content.displayName
+
+const SelectLabel = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Label
+    ref={ref}
+    className={cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className)}
+    {...props}
+  />
+))
+SelectLabel.displayName = SelectPrimitive.Label.displayName
+
+const SelectItem = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-slate-100 focus:text-slate-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-800 dark:focus:text-slate-50",
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <SelectPrimitive.ItemIndicator>
+        <Check className="h-4 w-4" />
+      </SelectPrimitive.ItemIndicator>
+    </span>
+
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+  </SelectPrimitive.Item>
+))
+SelectItem.displayName = SelectPrimitive.Item.displayName
+
+const SelectSeparator = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-slate-100 dark:bg-slate-800", className)}
+    {...props}
+  />
+))
+SelectSeparator.displayName = SelectPrimitive.Separator.displayName
+
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+}
+
 // File: components/ui/skeleton.tsx
 import { cn } from "@/lib/utils"
 
@@ -857,6 +1256,7 @@ export default function LoginPage() {
 'use client';
 import Greeting from '@/components/greeting';
 import TaskList from '@/components/task-list';
+import Timer from '@/components/timer';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
@@ -868,7 +1268,10 @@ export default function Home() {
       <main className='flex h-screen w-screen items-center justify-center overflow-hidden p-8 font-sans'>
         <div className='flex h-full w-full max-w-screen-2xl flex-col items-center gap-10 border p-8'>
           <Greeting />
-          <TaskList />
+          <div className='flex w-full gap-8'>
+            <TaskList />
+            <Timer />
+          </div>
         </div>
       </main>
       <ReactQueryDevtools initialIsOpen={false} />
@@ -890,6 +1293,7 @@ export const addTask = async (task: TaskType): Promise<TaskType> => {
   const tasks = await fetchTasks();
   tasks.push(task);
   localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  console.log('task:', task.title, 'added');
   return task;
 };
 
@@ -898,6 +1302,7 @@ export const updateTask = async (updatedTask: TaskType): Promise<TaskType> => {
   const taskIndex = tasks.findIndex((task) => task.id === updatedTask.id);
   tasks[taskIndex] = updatedTask;
   localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  console.log(updatedTask, ' successfully updated');
   return updatedTask;
 };
 
@@ -905,6 +1310,7 @@ export const deleteTask = async (taskId: number): Promise<void> => {
   let tasks = await fetchTasks();
   tasks = tasks.filter((task) => task.id !== taskId);
   localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  console.log(`Deleted task "${taskId}"`);
 };
 
 // File: utils/supabase/client.ts

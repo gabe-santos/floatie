@@ -1,4 +1,4 @@
-import { TaskType } from '@/types/task';
+import { TaskType } from '../../types/task';
 
 const TASKS_KEY = 'floatie-tasks';
 

@@ -1,15 +1,14 @@
-import { Check, Ellipsis, Pencil } from 'lucide-react';
+import React, { useState, useReducer } from 'react';
 import { Button } from './ui/button';
-import { cn } from '@/lib/utils';
+import { Check, Ellipsis, Pencil } from 'lucide-react';
+import TaskForm from './task-form';
+import { TaskType } from '../types/task';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from './ui/dropdown-menu';
-import TaskForm from './task-form';
-import { TaskType } from '@/types/task';
-import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   deleteTask,
@@ -21,9 +20,7 @@ interface TaskProps {
 }
 
 export default function Task({ task }: TaskProps) {
-  const [isComplete, setIsComplete] = useState(task.completed);
   const [isEditing, setIsEditing] = useState(false);
-  const [taskInput, setTaskInput] = useState(task.title);
   const queryClient = useQueryClient();
 
   const updateTaskMutation = useMutation({
@@ -41,16 +38,15 @@ export default function Task({ task }: TaskProps) {
   });
 
   const handleMarkComplete = () => {
-    const updatedTask = { ...task, completed: !isComplete };
+    const updatedTask = { ...task, completed: !task.completed };
     updateTaskMutation.mutate(updatedTask, {
       onSuccess: () => {
-        setIsComplete(!isComplete);
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
       },
     });
   };
 
   const handleEditTask = () => {
-    setTaskInput(task.title);
     setIsEditing(true);
   };
 
@@ -59,26 +55,23 @@ export default function Task({ task }: TaskProps) {
   };
 
   const handleCancel = () => {
-    setTaskInput(task.title);
     setIsEditing(false);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    updateTaskMutation.mutate({ ...task, title: taskInput });
+  const handleSubmit = (updatedTask: TaskType) => {
+    updateTaskMutation.mutate(updatedTask);
     setIsEditing(false);
   };
 
-  const titleStyles = isComplete ? 'opacity-50 line-through' : '';
+  const titleStyles = task.completed ? 'opacity-50 line-through' : '';
 
   return (
     <div>
       {isEditing ? (
         <TaskForm
-          taskInput={taskInput}
-          setTaskInput={setTaskInput}
-          handleSubmit={handleSubmit}
-          handleCancel={handleCancel}
+          initialTask={task}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
         />
       ) : (
         <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-2 py-1 transition-opacity hover:border-opacity-20'>
@@ -95,18 +88,19 @@ export default function Task({ task }: TaskProps) {
             />
           </Button>
           <span
-            className={cn(
-              'flex-1 overflow-hidden whitespace-nowrap text-lg',
-              titleStyles,
-            )}
+            className={`flex-1 overflow-hidden whitespace-nowrap text-lg ${titleStyles}`}
           >
             {task.title}
           </span>
           <span className='rounded bg-slate-600 px-1 opacity-30'>
             {task.due_date || ''}
           </span>
+          <span className='opacity-30'>{task.priority_lvl || ''}</span>
           <span className='opacity-30'>{task.timer_duration || ''}</span>
-          <EditBtn onClick={handleEditTask} />
+          <Pencil
+            onClick={handleEditTask}
+            className='opacity-0 hover:opacity-100 group-hover/li:opacity-25'
+          />
           <DropdownMenu>
             <DropdownMenuTrigger className='opacity-0 group-hover/li:opacity-80'>
               <Ellipsis />
@@ -126,12 +120,3 @@ export default function Task({ task }: TaskProps) {
     </div>
   );
 }
-
-const EditBtn = ({ onClick }) => {
-  return (
-    <Pencil
-      onClick={onClick}
-      className='opacity-0 hover:opacity-100 group-hover/li:opacity-25'
-    />
-  );
-};
