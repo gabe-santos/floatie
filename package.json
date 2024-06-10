@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.1",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-popover": "^1.0.7",
     "@radix-ui/react-select": "^2.0.0",
@@ -19,6 +20,7 @@
     "@tanstack/react-query-devtools": "^5.40.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "gsap": "^3.12.5",
     "lucide-react": "^0.381.0",
     "next": "14.2.3",
     "react": "^18",
