@@ -9,6 +9,8 @@ import {
   SelectItem,
 } from './ui/select';
 import { TaskType } from '../types/task';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Timer } from 'lucide-react';
 
 interface TaskFormProps {
   initialTask: TaskType;
@@ -31,6 +33,16 @@ export default function TaskForm({
     value: 'Urgent' | 'High' | 'Medium' | 'Low',
   ) => {
     setTaskFields({ ...taskFields, priority_lvl: value });
+  };
+
+  const handleTimerInputChange = (e) => {
+    setTaskFields({ ...taskFields, timer_duration: e.target.value });
+  };
+
+  const handleTimerSubmit = (e) => {
+    e.preventDefault();
+    setTaskFields({ ...taskFields, timer_duration: taskFields.timer_duration });
+    onSubmit(taskFields);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -72,6 +84,34 @@ export default function TaskForm({
               <SelectItem value='Low'>Low</SelectItem>
             </SelectContent>
           </Select>
+          <Popover>
+            <PopoverTrigger>
+              <Button variant='outline' size='icon'>
+                <Timer />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <form
+                onSubmit={handleTimerSubmit}
+                className='flex flex-col gap-4'
+              >
+                <div className='relative'>
+                  <Input
+                    value={taskFields.timer_duration}
+                    onChange={handleTimerInputChange}
+                    min={0}
+                    step={5}
+                    type='number'
+                    className='pr-12'
+                  />
+                  <span className='absolute inset-y-0 right-0 flex items-center pr-3'>
+                    min
+                  </span>
+                </div>
+                <Button type='submit'>Save</Button>
+              </form>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className='flex w-full justify-end gap-2'>
           <Button variant='secondary' onClick={onCancel}>
