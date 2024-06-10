@@ -1,6 +1,6 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { Check, Ellipsis, Pencil } from 'lucide-react';
+import { Check, Ellipsis, Pencil, Play } from 'lucide-react';
 import TaskForm from './task-form';
 import { TaskType } from '../types/task';
 import {
@@ -14,6 +14,7 @@ import {
   deleteTask,
   updateTask as updateTaskService,
 } from '../utils/services/taskService';
+import useTimerStore from '../store/timer-store';
 
 interface TaskProps {
   task: TaskType;
@@ -22,6 +23,7 @@ interface TaskProps {
 export default function Task({ task }: TaskProps) {
   const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
+  const { timerStart, setMinutes } = useTimerStore();
 
   const updateTaskMutation = useMutation({
     mutationFn: updateTaskService,
@@ -63,6 +65,11 @@ export default function Task({ task }: TaskProps) {
     setIsEditing(false);
   };
 
+  const handleStartTimer = () => {
+    setMinutes(task.timer_duration);
+    timerStart();
+  };
+
   const titleStyles = task.completed ? 'opacity-50 line-through' : '';
 
   return (
@@ -96,7 +103,20 @@ export default function Task({ task }: TaskProps) {
             {task.due_date || ''}
           </span>
           <span className='opacity-30'>{task.priority_lvl || ''}</span>
-          <span className='opacity-30'>{task.timer_duration || ''}</span>
+          <TimerDurationDisplay
+            minutes={task.timer_duration}
+            className='opacity-30'
+          />
+          {task.timer_duration > 0 && (
+            <Button
+              onClick={handleStartTimer}
+              variant='outline'
+              size='icon'
+              className=''
+            >
+              <Play className='w-4' />
+            </Button>
+          )}
           <Pencil
             onClick={handleEditTask}
             className='opacity-0 hover:opacity-100 group-hover/li:opacity-25'
@@ -120,3 +140,10 @@ export default function Task({ task }: TaskProps) {
     </div>
   );
 }
+
+const TimerDurationDisplay = ({ minutes, ...props }) => {
+  const displayValue =
+    minutes >= 60 ? `${(minutes / 60).toFixed(1)} hr` : `${minutes}m`;
+
+  return <span {...props}>{minutes > 0 ? displayValue : ''}</span>;
+};

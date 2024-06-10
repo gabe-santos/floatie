@@ -1,16 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
 import { Button } from './ui/button';
+import useTimerStore from '../store/timer-store';
 
 export default function Timer() {
-  const [seconds, setSeconds] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [inputHours, setInputHours] = useState(0);
   const [inputMinutes, setInputMinutes] = useState(0);
   const [inputSeconds, setInputSeconds] = useState(0);
 
+  const { seconds, setSeconds, timerRunning, timerStop, timerStart } =
+    useTimerStore();
+
   const secondsRef = useRef(seconds);
-  const isRunningRef = useRef(isRunning);
+  const isRunningRef = useRef(timerRunning);
 
   // Sync refs with state
   useEffect(() => {
@@ -18,24 +20,24 @@ export default function Timer() {
   }, [seconds]);
 
   useEffect(() => {
-    isRunningRef.current = isRunning;
-  }, [isRunning]);
+    isRunningRef.current = timerRunning;
+  }, [timerRunning]);
 
   // Decrement timer
   const tick = () => {
     if (secondsRef.current > 0) {
       setSeconds(secondsRef.current - 1);
     } else {
-      setIsRunning(false);
+      timerStop();
     }
   };
 
   useEffect(() => {
-    if (isRunning) {
+    if (timerRunning) {
       const interval = setInterval(tick, 1000);
       return () => clearInterval(interval);
     }
-  }, [isRunning]);
+  }, [timerRunning]);
 
   // Function to format timer into hh:mm:ss or mm:ss
   const formatDuration = (seconds: number) => {
@@ -58,15 +60,15 @@ export default function Timer() {
     }
   };
   const startTimer = () => {
-    setIsRunning(true);
+    timerStart();
     isRunningRef.current = true;
   };
   const resetTimer = () => {
     setSeconds(0);
-    setIsRunning(false);
+    timerStop();
   };
   const handlePause = () => {
-    setIsRunning(false);
+    timerStop();
   };
   const handleStop = () => {
     handlePause();
@@ -151,7 +153,7 @@ export default function Timer() {
           +
         </Button>
       </div>
-      {isRunning ? (
+      {timerRunning ? (
         <div className='flex'>
           <Button onClick={handlePause}>Pause</Button>
           <Button onClick={handleStop}>Stop</Button>

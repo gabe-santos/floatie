@@ -41,13 +41,14 @@ export default function TaskForm({
 
   const handleTimerSubmit = (e) => {
     e.preventDefault();
-    setTaskFields({ ...taskFields, timer_duration: taskFields.timer_duration });
-    onSubmit(taskFields);
+    const updatedTask = { ...taskFields };
+    onSubmit(updatedTask);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit(taskFields);
+    const updatedTask = { ...taskFields };
+    onSubmit(updatedTask);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
@@ -92,7 +93,7 @@ export default function TaskForm({
             </PopoverTrigger>
             <PopoverContent>
               <form
-                onSubmit={handleTimerSubmit}
+                // onSubmit={handleTimerSubmit}
                 className='flex flex-col gap-4'
               >
                 <div className='relative'>
@@ -108,7 +109,9 @@ export default function TaskForm({
                     min
                   </span>
                 </div>
-                <Button type='submit'>Save</Button>
+                <Button onClick={handleTimerSubmit} type='submit'>
+                  Save
+                </Button>
               </form>
             </PopoverContent>
           </Popover>
