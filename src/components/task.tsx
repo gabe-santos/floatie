@@ -81,7 +81,7 @@ export default function Task({ task }: TaskProps) {
           onCancel={handleCancel}
         />
       ) : (
-        <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-2 py-1 transition-opacity hover:border-opacity-20'>
+        <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-4 py-2 transition-opacity hover:border-opacity-20'>
           <Button
             onClick={handleMarkComplete}
             variant='outline'
