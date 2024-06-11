@@ -1,10 +1,10 @@
-import { Square, X } from 'lucide-react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { Square } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import useTimerStore from '../store/timer-store';
 import { Button } from './ui/button';
-import Timer from './timer';
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
 
 const formatDuration = (seconds: number) => {
   const h = Math.floor(seconds / 3600);
@@ -19,40 +19,41 @@ const formatDuration = (seconds: number) => {
 };
 
 export default function FullScreenTimer() {
-  const { timerRunning, timerStop, seconds, setSeconds } = useTimerStore();
+  const { timerRunning, timerStop, seconds, setSeconds, lastSetInterval } =
+    useTimerStore();
   const secondsRef = useRef(seconds);
   const isRunningRef = useRef(timerRunning);
   const modalRef = useRef(null);
 
   // Sync refs with state
-  useEffect(() => {
-    secondsRef.current = seconds;
-  }, [seconds]);
-
-  useEffect(() => {
-    isRunningRef.current = timerRunning;
-  }, [timerRunning]);
-
-  // Decrement timer
-  const tick = () => {
-    if (secondsRef.current > 0) {
-      setSeconds(secondsRef.current - 1);
-    } else {
-      timerStop();
-    }
-  };
-
+  // useEffect(() => {
+  //   secondsRef.current = seconds;
+  // }, [seconds]);
+  //
+  // useEffect(() => {
+  //   isRunningRef.current = timerRunning;
+  // }, [timerRunning]);
+  //
+  // // Decrement timer
+  // const tick = () => {
+  //   if (secondsRef.current > 0) {
+  //     setSeconds(secondsRef.current - 1);
+  //   } else {
+  //     timerStop();
+  //   }
+  // };
+  //
   const handleStop = () => {
     timerStop();
-    setSeconds(0);
+    setSeconds(lastSetInterval);
   };
-
-  useEffect(() => {
-    if (timerRunning) {
-      const interval = setInterval(tick, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [timerRunning]);
+  //
+  // useEffect(() => {
+  //   if (timerRunning) {
+  //     const interval = setInterval(tick, 1000);
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [timerRunning]);
 
   useGSAP(() => {
     if (timerRunning) {
@@ -68,14 +69,27 @@ export default function FullScreenTimer() {
   return (
     <div
       ref={modalRef}
-      className='animation-fadeIn fixed flex h-full w-full flex-col items-center justify-center bg-red-500'
+      className='fixed flex h-full w-full flex-col items-center justify-center bg-red-500'
     >
-      <h1 className='font-serif text-8xl font-light text-white'>
-        {formatDuration(seconds)}
-      </h1>
+      <CountdownCircleTimer
+        isPlaying
+        duration={lastSetInterval}
+        colors={'#ffffff'}
+        rotation='counterclockwise'
+        size={500}
+        trailColor='#ffffff00'
+        strokeWidth={20}
+      >
+        {({ remainingTime }) => (
+          <span className='font-serif text-8xl font-light text-white'>
+            {formatDuration(remainingTime)}
+          </span>
+        )}
+      </CountdownCircleTimer>
+
       <Button
         className='rounded-full'
-        variant='ghost'
+        variant='outline'
         size='icon'
         onClick={handleStop}
       >

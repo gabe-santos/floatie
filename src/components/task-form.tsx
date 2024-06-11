@@ -68,6 +68,7 @@ export default function TaskForm({
         value={taskFields.title}
         onChange={handleChange}
         type='text'
+        className='text-lg'
       />
       <div className='flex'>
         <div className='flex w-full justify-start gap-2'>
