@@ -4,8 +4,10 @@ type TimerStore = {
   seconds: number;
   minutes: number;
   lastSetInterval: number;
+  currentTask: string;
   setSeconds: (s: number) => void;
   setMinutes: (m: number) => void;
+  setCurrentTask: (t: string) => void;
   timerRunning: boolean;
   timerStart: () => void;
   timerStop: () => void;
@@ -15,6 +17,7 @@ const useTimerStore = create<TimerStore>((set, get) => ({
   seconds: 0,
   minutes: 0,
   lastSetInterval: 0,
+  currentTask: '',
   setSeconds: (seconds) =>
     set(() => {
       const minutes = seconds / 60;
@@ -25,6 +28,7 @@ const useTimerStore = create<TimerStore>((set, get) => ({
       const seconds = minutes * 60;
       return { minutes, seconds };
     }),
+  setCurrentTask: (title) => set(() => ({ currentTask: title })),
   timerRunning: false,
   timerStart: () =>
     set((state) => ({

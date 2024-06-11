@@ -23,7 +23,7 @@ interface TaskProps {
 export default function Task({ task }: TaskProps) {
   const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
-  const { timerStart, setMinutes } = useTimerStore();
+  const { timerStart, setMinutes, setCurrentTask } = useTimerStore();
 
   const updateTaskMutation = useMutation({
     mutationFn: updateTaskService,
@@ -66,6 +66,7 @@ export default function Task({ task }: TaskProps) {
   };
 
   const handleStartTimer = () => {
+    setCurrentTask(task.title);
     setMinutes(task.timer_duration);
     timerStart();
   };

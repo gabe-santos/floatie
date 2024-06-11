@@ -19,8 +19,14 @@ const formatDuration = (seconds: number) => {
 };
 
 export default function FullScreenTimer() {
-  const { timerRunning, timerStop, seconds, setSeconds, lastSetInterval } =
-    useTimerStore();
+  const {
+    timerRunning,
+    timerStop,
+    seconds,
+    setSeconds,
+    lastSetInterval,
+    currentTask,
+  } = useTimerStore();
   const secondsRef = useRef(seconds);
   const isRunningRef = useRef(timerRunning);
   const modalRef = useRef(null);
@@ -69,8 +75,11 @@ export default function FullScreenTimer() {
   return (
     <div
       ref={modalRef}
-      className='fixed flex h-full w-full flex-col items-center justify-center bg-red-500'
+      className='fixed flex h-full w-full flex-col items-center justify-center gap-8 bg-red-500'
     >
+      <h1 className='font-serif text-8xl font-light text-white'>
+        {currentTask}
+      </h1>
       <CountdownCircleTimer
         isPlaying
         duration={lastSetInterval}

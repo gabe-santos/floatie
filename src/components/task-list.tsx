@@ -47,7 +47,7 @@ export default function TaskList() {
   };
 
   return (
-    <div className='flex w-1/2 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'>
+    <div className='flex w-1/2 flex-1 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'>
       <ul className='flex flex-col gap-2'>
         {isLoading && <Skeleton className='h-[400px]' />}
         {tasks?.map((t) => <Task task={t} key={t.id} />)}

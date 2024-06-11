@@ -9,7 +9,8 @@ export default function Timer() {
   const [inputMinutes, setInputMinutes] = useState(0);
   const [inputSeconds, setInputSeconds] = useState(0);
 
-  const { seconds, setSeconds, timerStop, timerStart } = useTimerStore();
+  const { seconds, setSeconds, timerStop, timerStart, setCurrentTask } =
+    useTimerStore();
 
   // Function to format timer into hh:mm:ss or mm:ss
   const formatDuration = (seconds: number) => {
@@ -32,6 +33,7 @@ export default function Timer() {
     }
   };
   const startTimer = () => {
+    setCurrentTask('');
     timerStart();
   };
   const resetTimer = () => {

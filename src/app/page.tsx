@@ -14,7 +14,7 @@ export default function Home() {
       <main className='relative flex h-screen w-screen items-center justify-center overflow-hidden p-8 font-sans'>
         <div className='flex h-full w-full max-w-screen-2xl flex-col items-center gap-10 border p-8'>
           <Greeting />
-          <div className='flex w-full gap-8'>
+          <div className='flex w-full justify-between gap-8'>
             <TaskList />
             <Timer />
           </div>
