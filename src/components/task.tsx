@@ -15,6 +15,7 @@ import {
   updateTask as updateTaskService,
 } from '../utils/services/taskService';
 import useTimerStore from '../store/timer-store';
+import { Checkbox } from './ui/checkbox';
 
 interface TaskProps {
   task: TaskType;
@@ -83,20 +84,9 @@ export default function Task({ task }: TaskProps) {
         />
       ) : (
         <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-4 py-2 transition-opacity hover:border-opacity-20'>
-          <Button
-            onClick={handleMarkComplete}
-            variant='outline'
-            role='checkbox'
-            className='transparent group/button flex h-6 w-6 items-center justify-center rounded-full p-0'
-          >
-            <Check
-              color='#000000'
-              size={12}
-              className='opacity-0 group-hover/button:opacity-100'
-            />
-          </Button>
+          <Checkbox onCheckedChange={handleMarkComplete} />
           <span
-            className={`flex-1 overflow-hidden whitespace-nowrap text-lg ${titleStyles}`}
+            className={`flex-1 overflow-hidden whitespace-nowrap ${titleStyles}`}
           >
             {task.title}
           </span>

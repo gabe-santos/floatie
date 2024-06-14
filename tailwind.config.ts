@@ -18,6 +18,7 @@ const config = {
       },
     },
     extend: {
+      colors: {},
       fontFamily: {
         sans: ['var(--font-geist)'],
         serif: ['var(--font-fraunces)'],

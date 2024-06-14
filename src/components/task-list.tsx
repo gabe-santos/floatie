@@ -134,7 +134,7 @@ export default function TaskList() {
       ) : (
         <Button
           variant='ghost'
-          className='flex w-full items-center gap-2 border border-black border-opacity-0 px-4 py-2 text-lg font-normal hover:border-opacity-100'
+          className='text-md flex w-full items-center gap-2 border border-black border-opacity-0 px-4 py-2 font-normal hover:border-opacity-100'
           onClick={() => setIsEditing(true)}
         >
           <PlusCircle size={24} />
