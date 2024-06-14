@@ -13,44 +13,35 @@ import { fetchTasks, addTask } from '../utils/services/taskService';
 import Task from './task';
 import { Skeleton } from './ui/skeleton';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
+  DropdownMenu,
+  DropdownMenuLabel,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+} from './ui/dropdown-menu';
+import { Select, SelectItem, SelectTrigger } from './ui/select';
 
 const sortingOptions = [
   {
-    label: 'Priority',
-    value: 'priority',
+    label: 'Priority (High to Low)',
+    value: 'priority-high',
   },
   {
-    label: 'Date',
-    value: 'date',
+    label: 'Priority (Low to High)',
+    value: 'priority-low',
   },
-  { label: 'Name', value: 'name' },
 ];
-
-const priorityOrder = {
-  Urgent: 4,
-  High: 3,
-  Medium: 2,
-  Low: 1,
-};
+enum Priority {}
 
 const sortTasks = (tasks, sort) => {
   switch (sort) {
-    case 'priority':
-      return tasks.sort(
-        (a, b) => priorityOrder[b.priority_lvl] - priorityOrder[a.priority_lvl],
-      );
-    case 'date':
-      return tasks.sort(
-        (a, b) => new Date(a.created_at) - new Date(b.created_at),
-      );
-    case 'name':
-      return tasks.sort((a, b) => a.title.localeCompare(b.title));
+    case 'priority-high':
+      return tasks.sort((a, b) => b.priority_lvl - a.priority_lvl);
+    case 'priority-low':
+      return tasks.sort((a, b) => a.priority_lvl - b.priority_lvl);
     default:
       return tasks;
   }
@@ -96,28 +87,12 @@ export default function TaskList() {
     setIsEditing(false);
   };
 
-  const handleSort = (e) => {
-    console.log(e);
-    setSort(e);
-  };
-
   const sortedTasks = tasks ? sortTasks([...tasks], sort) : [];
 
   return (
     <div className='flex w-1/2 flex-1 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'>
       <div className='flex w-full justify-end'>
-        <Select onValueChange={handleSort} value={sort}>
-          <SelectTrigger className='w-fit'>
-            <SelectValue placeholder='Sorting' />
-          </SelectTrigger>
-          <SelectContent>
-            {sortingOptions.map((option) => (
-              <SelectItem value={option.value}>
-                Sort by {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Select></Select>
       </div>
 
       <ul className='flex flex-col gap-2'>
