@@ -104,7 +104,7 @@ export default function TaskList() {
   const sortedTasks = tasks ? sortTasks([...tasks], sort) : [];
 
   return (
-    <div className='flex w-1/2 flex-1 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'>
+    <div className='flex h-full flex-1 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'>
       <div className='flex w-full justify-end'>
         <Select onValueChange={handleSort} value={sort}>
           <SelectTrigger className='w-fit'>
