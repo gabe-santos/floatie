@@ -38,7 +38,7 @@ export default function Greeting() {
   return (
     <div className='h-[250px] w-full'>
       {greeting ? (
-        <div className='flex h-full flex-col justify-between'>
+        <div className='flex h-full flex-col justify-between gap-6'>
           <h1 className='w-[675px] font-serif text-8xl font-thin leading-none'>
             {greeting}
           </h1>
