@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { QuickLinkType } from '../types/quick-link';
 import mql from '@microlink/mql';
-import Link from 'next/link';
 import {
   Dialog,
   DialogContent,
@@ -82,7 +81,12 @@ export default function QuickLinks() {
             key={index}
             className='relative flex h-24 w-full max-w-80 rounded-lg bg-white shadow-md'
           >
-            <Link href={link.url} className='flex h-full w-full'>
+            <a
+              target='_blank'
+              href={link.url}
+              rel='noopener noreferrer'
+              className='flex h-full w-full'
+            >
               <img
                 src={link.logoUrl}
                 alt={`${link.title} icon`}
@@ -93,7 +97,7 @@ export default function QuickLinks() {
                   {link.title}
                 </h2>
               </div>
-            </Link>
+            </a>
             <DropdownMenu>
               <DropdownMenuTrigger className='absolute right-0 p-2'>
                 <DotsHorizontalIcon className='h-5 w-5' />
