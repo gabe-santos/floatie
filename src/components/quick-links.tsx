@@ -13,15 +13,23 @@ import { Input } from './ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   addQuickLink,
+  deleteQuickLink,
   fetchQuickLinks,
 } from '../utils/services/quick-link-service';
 import { Skeleton } from './ui/skeleton';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 
 const fetchWebsiteInfo = async (url: string): Promise<QuickLinkType> => {
   const { data } = await mql(url, { meta: true });
   console.log(data);
   return {
+    id: data.url,
     title: data.title,
     description: data.description,
     url: data.url,
@@ -38,8 +46,15 @@ export default function QuickLinks() {
     isLoading,
   } = useQuery({ queryKey: ['quick-links'], queryFn: fetchQuickLinks });
 
-  const addMutation = useMutation({
+  const addLinkMutation = useMutation({
     mutationFn: addQuickLink,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quick-links'] });
+    },
+  });
+
+  const deleteLinkMutation = useMutation({
+    mutationFn: deleteQuickLink,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quick-links'] });
     },
@@ -48,7 +63,11 @@ export default function QuickLinks() {
   const handleAddLink = async (url: string) => {
     // Get info via microlink
     const newQuickLink = await fetchWebsiteInfo(url);
-    addMutation.mutate(newQuickLink);
+    addLinkMutation.mutate(newQuickLink);
+  };
+
+  const handleDeleteLink = (id: string) => {
+    deleteLinkMutation.mutate(id);
   };
 
   if (error) return 'Error loading links';
@@ -59,31 +78,36 @@ export default function QuickLinks() {
       <div className='grid w-full grid-cols-2 items-start gap-6 md:grid-cols-3'>
         {isLoading && <Skeleton className='h-full w-full' />}
         {links?.map((link, index) => (
-          <Link
-            href={link.url}
-            className='flex h-24 w-full max-w-80 rounded-lg bg-white shadow-md'
+          <div
             key={index}
+            className='relative flex h-24 w-full max-w-80 rounded-lg bg-white shadow-md'
           >
-            <img
-              src={link.logoUrl}
-              alt={`${link.title} icon`}
-              className='h-24 w-24 rounded-l-lg'
-            />
-            <div className='flex w-full flex-col items-center justify-center p-5'>
-              <DropdownMenu.Root className='w-full justify-end'>
-                <DropdownMenu.Trigger>button</DropdownMenu.Trigger>
-                <DropdownMenu.Portal>
-                  <DropdownMenu.Content>
-                    <DropdownMenu.Item>Delete</DropdownMenu.Item>
-                  </DropdownMenu.Content>
-                </DropdownMenu.Portal>
-              </DropdownMenu.Root>
-
-              <h2 className='h-full w-full overflow-hidden text-ellipsis text-pretty'>
-                {link.title}
-              </h2>
-            </div>
-          </Link>
+            <Link href={link.url} className='flex h-full w-full'>
+              <img
+                src={link.logoUrl}
+                alt={`${link.title} icon`}
+                className='h-24 w-24 rounded-l-lg'
+              />
+              <div className='flex w-full flex-col items-center justify-between p-4'>
+                <h2 className='h-full w-full overflow-hidden text-ellipsis text-pretty text-sm'>
+                  {link.title}
+                </h2>
+              </div>
+            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger className='absolute right-0 p-2'>
+                <DotsHorizontalIcon className='h-5 w-5' />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => handleDeleteLink(link.id)}
+                  className='text-red-700'
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         ))}
         <AddQuickLinkBtn onAddLink={handleAddLink} />
       </div>

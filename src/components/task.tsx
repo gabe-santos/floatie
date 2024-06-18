@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import {
-  CheckIcon,
   DotsHorizontalIcon,
   Pencil1Icon,
   PlayIcon,
