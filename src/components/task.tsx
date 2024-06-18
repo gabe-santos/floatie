@@ -71,6 +71,7 @@ export default function Task({ task }: TaskProps) {
   };
 
   const handleStartTimer = () => {
+    if (task.timer_duration === null) return;
     setCurrentTask(task.title);
     setMinutes(task.timer_duration);
     timerStart();
@@ -136,7 +137,15 @@ export default function Task({ task }: TaskProps) {
   );
 }
 
-const TimerDurationDisplay = ({ minutes, ...props }) => {
+interface TimerDurationDisplayProps
+  extends React.HTMLAttributes<HTMLSpanElement> {
+  minutes: number;
+}
+
+const TimerDurationDisplay: React.FC<TimerDurationDisplayProps> = ({
+  minutes,
+  ...props
+}) => {
   const displayValue =
     minutes >= 60 ? `${(minutes / 60).toFixed(1)} hr` : `${minutes}m`;
 

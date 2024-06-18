@@ -23,7 +23,7 @@ export default function TaskForm({
   onSubmit,
   onCancel,
 }: TaskFormProps) {
-  const [taskFields, setTaskFields] = useState(initialTask);
+  const [taskFields, setTaskFields] = useState<TaskType>(initialTask);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTaskFields({ ...taskFields, title: e.target.value });
@@ -35,26 +35,29 @@ export default function TaskForm({
     setTaskFields({ ...taskFields, priority_lvl: value });
   };
 
-  const handleTimerInputChange = (e) => {
-    setTaskFields({ ...taskFields, timer_duration: e.target.value });
+  const handleTimerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTaskFields({
+      ...taskFields,
+      timer_duration: parseFloat(e.target.value),
+    });
   };
 
-  const handleTimerSubmit = (e) => {
+  const handleTimerSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const updatedTask = { ...taskFields };
     onSubmit(updatedTask);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const updatedTask = { ...taskFields };
     onSubmit(updatedTask);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleSubmit(e);
+      handleSubmit(e as unknown as React.MouseEvent<HTMLButtonElement>);
     }
   };
 
@@ -74,7 +77,7 @@ export default function TaskForm({
         <div className='flex w-full justify-start gap-2'>
           <Select
             onValueChange={handlePrioritySelect}
-            value={taskFields.priority_lvl}
+            value={taskFields.priority_lvl?.toString()}
           >
             <SelectTrigger>
               <SelectValue placeholder='Priority' />
@@ -99,7 +102,7 @@ export default function TaskForm({
               >
                 <div className='relative'>
                   <Input
-                    value={taskFields.timer_duration}
+                    value={taskFields.timer_duration?.toString()}
                     onChange={handleTimerInputChange}
                     min={0}
                     step={5}

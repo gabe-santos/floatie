@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { PlusCircledIcon } from '@radix-ui/react-icons';
 import TaskForm from './task-form';
@@ -15,7 +15,12 @@ import {
   SelectValue,
 } from './ui/select';
 
-const sortingOptions = [
+interface SortingOption {
+  label: string;
+  value: 'priority' | 'date' | 'name';
+}
+
+const sortingOptions: SortingOption[] = [
   {
     label: 'Priority',
     value: 'priority',
@@ -27,22 +32,25 @@ const sortingOptions = [
   { label: 'Name', value: 'name' },
 ];
 
-const priorityOrder = {
+const priorityOrder: Record<string, number> = {
   Urgent: 4,
   High: 3,
   Medium: 2,
   Low: 1,
 };
 
-const sortTasks = (tasks, sort) => {
+const sortTasks = (tasks: TaskType[], sort: string | undefined) => {
   switch (sort) {
     case 'priority':
       return tasks.sort(
-        (a, b) => priorityOrder[b.priority_lvl] - priorityOrder[a.priority_lvl],
+        (a, b) =>
+          (priorityOrder[b.priority_lvl as keyof typeof priorityOrder] || 0) -
+          (priorityOrder[a.priority_lvl as keyof typeof priorityOrder] || 0),
       );
     case 'date':
       return tasks.sort(
-        (a, b) => new Date(a.created_at) - new Date(b.created_at),
+        (a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       );
     case 'name':
       return tasks.sort((a, b) => a.title.localeCompare(b.title));
@@ -54,7 +62,7 @@ const sortTasks = (tasks, sort) => {
 export default function TaskList() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [sort, setSort] = useState();
+  const [sort, setSort] = useState<string | undefined>();
 
   const defaultTask: TaskType = {
     id: Math.floor(Math.random() * 1000),
@@ -70,7 +78,7 @@ export default function TaskList() {
     data: tasks,
     error,
     isLoading,
-  } = useQuery({
+  } = useQuery<TaskType[]>({
     queryKey: ['tasks'],
     queryFn: fetchTasks,
   });
@@ -91,9 +99,8 @@ export default function TaskList() {
     setIsEditing(false);
   };
 
-  const handleSort = (e) => {
-    console.log(e);
-    setSort(e);
+  const handleSort = (value: string) => {
+    setSort(value);
   };
 
   const sortedTasks = tasks ? sortTasks([...tasks], sort) : [];

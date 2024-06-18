@@ -23,17 +23,16 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import Image from 'next/image';
 
 const fetchWebsiteInfo = async (url: string): Promise<QuickLinkType> => {
   const { data } = await mql(url, { meta: true });
-  console.log(data);
+
   return {
-    id: data.url,
-    title: data.title,
-    description: data.description,
-    url: data.url,
-    logoUrl: data.logo.url,
+    id: data.url || '',
+    title: data.title || '',
+    description: data.description || '',
+    url: data.url || '',
+    logoUrl: data.logo?.url || '',
   };
 };
 
@@ -88,7 +87,7 @@ export default function QuickLinks() {
               rel='noopener noreferrer'
               className='flex h-full w-full'
             >
-              <Image
+              <img
                 src={link.logoUrl}
                 alt={`${link.title} icon`}
                 width={96}
@@ -129,7 +128,7 @@ type AddQuickLinkBtnProps = {
 const AddQuickLinkBtn = ({ onAddLink }: AddQuickLinkBtnProps) => {
   const [url, setUrl] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onAddLink(url);
     setUrl('');
