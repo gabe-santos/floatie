@@ -107,7 +107,7 @@ export default function TaskList() {
           </SelectTrigger>
           <SelectContent>
             {sortingOptions.map((option) => (
-              <SelectItem value={option.value}>
+              <SelectItem key={option.label} value={option.value}>
                 Sort by {option.label}
               </SelectItem>
             ))}

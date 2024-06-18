@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import Image from 'next/image';
 
 const fetchWebsiteInfo = async (url: string): Promise<QuickLinkType> => {
   const { data } = await mql(url, { meta: true });
@@ -87,9 +88,11 @@ export default function QuickLinks() {
               rel='noopener noreferrer'
               className='flex h-full w-full'
             >
-              <img
+              <Image
                 src={link.logoUrl}
                 alt={`${link.title} icon`}
+                width={96}
+                height={96}
                 className='h-24 w-24 rounded-l-lg'
               />
               <div className='flex w-full flex-col items-center justify-between p-4'>
