@@ -1,6 +1,6 @@
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { Square } from 'lucide-react';
+import { StopIcon } from '@radix-ui/react-icons';
 import { useEffect, useRef } from 'react';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import useTimerStore from '../store/timer-store';
@@ -102,7 +102,7 @@ export default function FullScreenTimer() {
         size='icon'
         onClick={handleStop}
       >
-        <Square />
+        <StopIcon />
       </Button>
     </div>
   );

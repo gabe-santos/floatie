@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import useTimerStore from '../store/timer-store';
-import { Minus, Play, Plus } from 'lucide-react';
+import { MinusIcon, PlusIcon, PlayIcon } from '@radix-ui/react-icons';
 
 export default function Timer() {
   const [isEditing, setIsEditing] = useState(false);
@@ -67,14 +67,14 @@ export default function Timer() {
       </h1>
       <div>
         <Button variant={'outline'} size='icon' onClick={decrementTimer}>
-          <Minus />
+          <MinusIcon />
         </Button>
         <Button variant={'outline'} size='icon' onClick={incrementTimer}>
-          <Plus />
+          <PlusIcon />
         </Button>
 
         <Button onClick={startTimer} size='icon'>
-          <Play />
+          <PlayIcon />
         </Button>
       </div>
     </div>

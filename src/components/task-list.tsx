@@ -1,15 +1,10 @@
 import React, { useState, useReducer } from 'react';
 import { Button } from './ui/button';
-import {
-  ArrowDownNarrowWide,
-  ArrowUp,
-  ArrowUpDown,
-  PlusCircle,
-} from 'lucide-react';
+import { PlusCircledIcon } from '@radix-ui/react-icons';
 import TaskForm from './task-form';
 import { TaskType } from '../types/task';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchTasks, addTask } from '../utils/services/taskService';
+import { fetchTasks, addTask } from '../utils/services/task-service';
 import Task from './task';
 import { Skeleton } from './ui/skeleton';
 import {
@@ -137,7 +132,7 @@ export default function TaskList() {
           className='text-md flex w-full items-center gap-2 border border-black border-opacity-0 px-4 py-2 font-normal hover:border-opacity-100'
           onClick={() => setIsEditing(true)}
         >
-          <PlusCircle size={24} />
+          <PlusCircledIcon />
           <span className='flex-1 text-left'>New Task</span>
         </Button>
       )}

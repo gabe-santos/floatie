@@ -10,7 +10,7 @@ import {
 } from './ui/select';
 import { TaskType } from '../types/task';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Timer } from 'lucide-react';
+import { TimerIcon } from '@radix-ui/react-icons';
 
 interface TaskFormProps {
   initialTask: TaskType;
@@ -89,7 +89,7 @@ export default function TaskForm({
           <Popover>
             <PopoverTrigger>
               <Button variant='outline' size='icon'>
-                <Timer />
+                <TimerIcon />
               </Button>
             </PopoverTrigger>
             <PopoverContent>

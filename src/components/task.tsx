@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { Check, Ellipsis, Pencil, Play } from 'lucide-react';
+import {
+  CheckIcon,
+  DotsHorizontalIcon,
+  Pencil1Icon,
+  PlayIcon,
+} from '@radix-ui/react-icons';
 import TaskForm from './task-form';
 import { TaskType } from '../types/task';
 import {
@@ -13,7 +18,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   deleteTask,
   updateTask as updateTaskService,
-} from '../utils/services/taskService';
+} from '../utils/services/task-service';
 import useTimerStore from '../store/timer-store';
 import { Checkbox } from './ui/checkbox';
 
@@ -105,16 +110,16 @@ export default function Task({ task }: TaskProps) {
               size='icon'
               className=''
             >
-              <Play className='w-4' />
+              <PlayIcon className='w-4' />
             </Button>
           )}
-          <Pencil
+          <Pencil1Icon
             onClick={handleEditTask}
             className='opacity-0 hover:opacity-100 group-hover/li:opacity-25'
           />
           <DropdownMenu>
             <DropdownMenuTrigger className='opacity-0 group-hover/li:opacity-80'>
-              <Ellipsis />
+              <DotsHorizontalIcon />
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='cursor-pointer'>
               <DropdownMenuItem onClick={handleEditTask}>Edit</DropdownMenuItem>
