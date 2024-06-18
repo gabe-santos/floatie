@@ -74,7 +74,7 @@ export default function QuickLinks() {
   return (
     <div className='h-full w-full'>
       <h1 className='font-serif text-lg font-thin'>Quick Links</h1>
-      <div className='grid w-full grid-cols-2 items-start gap-6 md:grid-cols-3'>
+      <div className='mt-4 grid w-full grid-cols-1 items-start gap-6 md:grid-cols-3'>
         {isLoading && <Skeleton className='h-full w-full' />}
         {links?.map((link, index) => (
           <div
@@ -136,7 +136,7 @@ const AddQuickLinkBtn = ({ onAddLink }: AddQuickLinkBtnProps) => {
 
   return (
     <Dialog>
-      <DialogTrigger className='h-24 w-80 rounded-lg border-2 border-dashed text-slate-300 hover:border-slate-800 hover:bg-slate-100 hover:text-slate-800'>
+      <DialogTrigger className='h-24 w-full rounded-lg border-2 border-dashed text-slate-300 hover:border-slate-800 hover:bg-slate-100 hover:text-slate-800'>
         Add Link
       </DialogTrigger>
       <DialogContent>

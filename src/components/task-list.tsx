@@ -107,7 +107,8 @@ export default function TaskList() {
 
   return (
     <div className='flex h-full flex-1 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'>
-      <div className='flex w-full justify-end'>
+      <div className='flex w-full items-center justify-between'>
+        <h2 className='text-sm'>Tasks</h2>
         <Select onValueChange={handleSort} value={sort}>
           <SelectTrigger className='w-fit'>
             <SelectValue placeholder='Sorting' />

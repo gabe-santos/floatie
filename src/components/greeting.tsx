@@ -39,7 +39,7 @@ export default function Greeting() {
     <div className='h-[250px] w-full'>
       {greeting ? (
         <div className='flex h-full flex-col justify-between gap-6'>
-          <h1 className='w-[675px] font-serif text-8xl font-thin leading-none'>
+          <h1 className='w-[675px] font-serif text-6xl font-thin leading-none'>
             {greeting}
           </h1>
           <p className='h-full w-[675px] font-serif text-4xl font-thin leading-none'>
