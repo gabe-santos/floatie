@@ -107,7 +107,7 @@ export default function TaskList() {
   const sortedTasks = tasks ? sortTasks([...tasks], sort) : [];
 
   return (
-    <div className='flex h-full w-full flex-1 flex-col justify-start rounded-md border bg-white p-2 shadow-md'>
+    <div className='flex h-full w-full flex-col justify-start rounded-md border bg-white p-2 shadow-md'>
       <div className='flex w-full items-center justify-between px-2'>
         <h2 className='text-sm opacity-50'>Tasks</h2>
         <Select onValueChange={handleSort} value={sort}>

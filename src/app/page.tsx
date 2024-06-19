@@ -15,7 +15,7 @@ export default function Home() {
       <main className='relative flex h-screen w-screen items-center justify-center overflow-hidden p-6 font-sans'>
         <div className='flex h-full w-full max-w-screen-lg flex-col items-center gap-8'>
           <Greeting />
-          <div className='flex h-full w-full flex-col items-start justify-between gap-4'>
+          <div className='flex h-full w-full flex-col items-start justify-between gap-4 md:flex-row'>
             <TaskList />
             <Timer />
           </div>
