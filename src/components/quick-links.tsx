@@ -23,14 +23,14 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { generateUniqueInt8Id } from '@/lib/utils';
 
 const fetchWebsiteInfo = async (url: string): Promise<QuickLinkType> => {
   const { data } = await mql(url, { meta: true });
 
   return {
-    id: data.url || '',
+    id: generateUniqueInt8Id(),
     title: data.title || '',
-    description: data.description || '',
     url: data.url || '',
     logoUrl: data.logo?.url || '',
   };
@@ -65,7 +65,7 @@ export default function QuickLinks() {
     addLinkMutation.mutate(newQuickLink);
   };
 
-  const handleDeleteLink = (id: string) => {
+  const handleDeleteLink = (id: number) => {
     deleteLinkMutation.mutate(id);
   };
 

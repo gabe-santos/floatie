@@ -30,9 +30,9 @@ export const updateQuickLink = async (
   return updatedQuickLink;
 };
 
-export const deleteQuickLink = async (quickLinkUrl: string): Promise<void> => {
+export const deleteQuickLink = async (quickLinkId: number): Promise<void> => {
   let quickLinks = await fetchQuickLinks();
-  quickLinks = quickLinks.filter((link) => link.url !== quickLinkUrl);
+  quickLinks = quickLinks.filter((link) => link.id !== quickLinkId);
   localStorage.setItem(QUICKLINKS_KEY, JSON.stringify(quickLinks));
-  console.log(`Deleted quick link "${quickLinkUrl}"`);
+  console.log(`Deleted quick link "${quickLinkId}"`);
 };

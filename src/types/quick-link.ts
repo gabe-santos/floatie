@@ -1,7 +1,6 @@
 export type QuickLinkType = {
-  id: string;
+  id: number;
   title: string;
-  description: string;
   url: string;
   logoUrl: string;
 };
