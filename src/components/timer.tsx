@@ -50,9 +50,9 @@ export default function Timer() {
   };
 
   return (
-    <div className='flex h-fit items-center justify-center gap-4 rounded-xl border bg-white px-8 py-4 shadow-md'>
+    <div className='flex h-fit w-full items-center justify-between gap-4 rounded-md border bg-white px-4 py-4 shadow-md'>
       <h1
-        className='w-[150px] cursor-pointer text-3xl'
+        className='w-[150px] cursor-pointer text-xl'
         onClick={() => {
           setIsEditing(true);
           const h = Math.floor(seconds / 3600);
@@ -65,16 +65,30 @@ export default function Timer() {
       >
         {formatDuration(seconds)}
       </h1>
-      <div>
-        <Button variant={'outline'} size='icon' onClick={decrementTimer}>
+
+      <div className='inline-flex w-fit'>
+        <Button
+          size='icon'
+          onClick={startTimer}
+          className='h-9 w-9 rounded-none rounded-l-md border-r-0'
+        >
+          <PlayIcon />
+        </Button>
+        <Button
+          variant={'outline'}
+          size='icon'
+          onClick={decrementTimer}
+          className='h-9 w-9 rounded-none border-l-stone-200 border-r-stone-200'
+        >
           <MinusIcon />
         </Button>
-        <Button variant={'outline'} size='icon' onClick={incrementTimer}>
+        <Button
+          variant={'outline'}
+          onClick={incrementTimer}
+          size='icon'
+          className='h-9 w-9 rounded-none rounded-r-md border-l-0'
+        >
           <PlusIcon />
-        </Button>
-
-        <Button onClick={startTimer} size='icon'>
-          <PlayIcon />
         </Button>
       </div>
     </div>

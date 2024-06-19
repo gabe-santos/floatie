@@ -36,18 +36,18 @@ export default function Greeting() {
   }, []);
 
   return (
-    <div className='h-[250px] w-full'>
+    <div className='w-full'>
       {greeting ? (
-        <div className='flex h-full flex-col justify-between gap-6'>
-          <h1 className='w-[675px] font-serif text-6xl font-thin leading-none'>
+        <div className='flex h-full flex-col justify-between gap-4'>
+          <h1 className='w-full font-serif text-2xl font-thin leading-none'>
             {greeting}
           </h1>
-          <p className='h-full w-[675px] font-serif text-4xl font-thin leading-none'>
+          <p className='h-full w-full font-serif text-lg font-thin'>
             Today is <span className='font-light'>{currentDate}</span>
           </p>
         </div>
       ) : (
-        <Skeleton className='h-full w-[675px]' />
+        <Skeleton className='h-[200px] w-[500px]' />
       )}
     </div>
   );

@@ -74,12 +74,12 @@ export default function QuickLinks() {
   return (
     <div className='h-full w-full'>
       <h1 className='font-serif text-lg font-thin'>Quick Links</h1>
-      <div className='mt-4 grid w-full grid-cols-1 items-start gap-6 md:grid-cols-3'>
+      <div className='mt-4 grid w-full grid-cols-2 items-start gap-6 md:grid-cols-3'>
         {isLoading && <Skeleton className='h-full w-full' />}
         {links?.map((link, index) => (
           <div
             key={index}
-            className='relative flex h-24 w-full max-w-80 rounded-lg bg-white shadow-md'
+            className='relative flex h-40 w-40 max-w-80 rounded-md border bg-white hover:shadow-md md:h-24 md:w-full'
           >
             <a
               target='_blank'
@@ -92,10 +92,10 @@ export default function QuickLinks() {
                 alt={`${link.title} icon`}
                 width={96}
                 height={96}
-                className='h-24 w-24 rounded-l-lg'
+                className='h-full w-full rounded-l-md rounded-r-md md:h-24 md:w-24'
               />
-              <div className='flex w-full flex-col items-center justify-between p-4'>
-                <h2 className='h-full w-full overflow-hidden text-ellipsis text-pretty text-sm'>
+              <div className='hidden w-full flex-col items-center justify-between p-4 text-sm md:flex'>
+                <h2 className='h-full w-full overflow-hidden text-ellipsis text-pretty'>
                   {link.title}
                 </h2>
               </div>
@@ -136,7 +136,7 @@ const AddQuickLinkBtn = ({ onAddLink }: AddQuickLinkBtnProps) => {
 
   return (
     <Dialog>
-      <DialogTrigger className='h-24 w-full rounded-lg border-2 border-dashed text-slate-300 hover:border-slate-800 hover:bg-slate-100 hover:text-slate-800'>
+      <DialogTrigger className='h-40 w-40 rounded-lg border-2 border-dashed text-slate-300 hover:border-slate-800 hover:bg-slate-100 hover:text-slate-800 md:h-24 md:w-full'>
         Add Link
       </DialogTrigger>
       <DialogContent>

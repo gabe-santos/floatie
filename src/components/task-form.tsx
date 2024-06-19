@@ -10,7 +10,7 @@ import {
 } from './ui/select';
 import { TaskType } from '../types/task';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { TimerIcon } from '@radix-ui/react-icons';
+import { CheckIcon, Cross1Icon, TimerIcon } from '@radix-ui/react-icons';
 
 interface TaskFormProps {
   initialTask: TaskType;
@@ -64,7 +64,7 @@ export default function TaskForm({
   return (
     <div
       onKeyDown={handleKeyDown}
-      className='flex flex-col gap-4 rounded-xl border border-black px-6 py-4'
+      className='flex flex-col gap-2 rounded-lg border border-stone-700 p-4'
     >
       <Input
         name='title'
@@ -74,7 +74,7 @@ export default function TaskForm({
         className='text-md'
       />
       <div className='flex'>
-        <div className='flex w-full justify-start gap-2'>
+        <div className='flex w-full items-center justify-start gap-1'>
           <Select
             onValueChange={handlePrioritySelect}
             value={taskFields.priority_lvl?.toString()}
@@ -113,18 +113,18 @@ export default function TaskForm({
                     min
                   </span>
                 </div>
-                <Button onClick={handleTimerSubmit} type='submit'>
-                  Save
-                </Button>
+                <Button onClick={handleTimerSubmit}>Save</Button>
               </form>
             </PopoverContent>
           </Popover>
         </div>
-        <div className='flex w-full justify-end gap-2'>
-          <Button variant='secondary' onClick={onCancel}>
-            Cancel
+        <div className='flex w-full justify-end gap-1'>
+          <Button variant='secondary' onClick={onCancel} size={'icon'}>
+            <Cross1Icon />
           </Button>
-          <Button onClick={handleSubmit}>Save</Button>
+          <Button onClick={handleSubmit} size={'icon'}>
+            <CheckIcon />
+          </Button>
         </div>
       </div>
     </div>

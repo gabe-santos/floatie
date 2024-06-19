@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { PlusCircledIcon } from '@radix-ui/react-icons';
+import { PlusCircledIcon, PlusIcon } from '@radix-ui/react-icons';
 import TaskForm from './task-form';
 import { TaskType } from '../types/task';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import { ScrollArea } from './ui/scroll-area';
 
 interface SortingOption {
   label: string;
@@ -106,11 +107,11 @@ export default function TaskList() {
   const sortedTasks = tasks ? sortTasks([...tasks], sort) : [];
 
   return (
-    <div className='flex h-full flex-1 flex-col gap-4 rounded-xl border bg-white p-4 shadow-md'>
-      <div className='flex w-full items-center justify-between'>
-        <h2 className='text-sm'>Tasks</h2>
+    <div className='flex h-full w-full flex-1 flex-col justify-start rounded-md border bg-white p-2 shadow-md'>
+      <div className='flex w-full items-center justify-between px-2'>
+        <h2 className='text-sm opacity-50'>Tasks</h2>
         <Select onValueChange={handleSort} value={sort}>
-          <SelectTrigger className='w-fit'>
+          <SelectTrigger className='focus:ring-none w-fit border-none p-0 opacity-50'>
             <SelectValue placeholder='Sorting' />
           </SelectTrigger>
           <SelectContent>
@@ -123,9 +124,11 @@ export default function TaskList() {
         </Select>
       </div>
 
-      <ul className='flex flex-col gap-2'>
-        {isLoading && <Skeleton className='h-[400px]' />}
-        {sortedTasks?.map((t) => <Task task={t} key={t.id} />)}
+      <ul className='flex max-h-[400px] flex-col gap-2'>
+        <ScrollArea>
+          {isLoading && <Skeleton className='h-[400px]' />}
+          {sortedTasks?.map((t) => <Task task={t} key={t.id} />)}
+        </ScrollArea>
       </ul>
 
       {isEditing ? (
@@ -137,11 +140,12 @@ export default function TaskList() {
       ) : (
         <Button
           variant='ghost'
-          className='text-md flex w-full items-center gap-2 border border-black border-opacity-0 px-4 py-2 font-normal hover:border-opacity-100'
+          className='flex w-full items-center gap-2 border border-black border-opacity-0 px-2 py-2 text-md font-normal opacity-50 hover:border-opacity-100 hover:opacity-100'
           onClick={() => setIsEditing(true)}
+          size={'sm'}
         >
-          <PlusCircledIcon />
-          <span className='flex-1 text-left'>New Task</span>
+          <PlusIcon />
+          <span className='flex-1 text-left text-md'>New Task</span>
         </Button>
       )}
     </div>

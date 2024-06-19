@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import {
   DotsHorizontalIcon,
+  DotsVerticalIcon,
   Pencil1Icon,
   PlayIcon,
+  TimerIcon,
 } from '@radix-ui/react-icons';
 import TaskForm from './task-form';
 import { TaskType } from '../types/task';
@@ -20,6 +22,7 @@ import {
 } from '../utils/services/task-service';
 import useTimerStore from '../store/timer-store';
 import { Checkbox } from './ui/checkbox';
+import { cn } from '@/lib/utils';
 
 interface TaskProps {
   task: TaskType;
@@ -88,30 +91,32 @@ export default function Task({ task }: TaskProps) {
           onCancel={handleCancel}
         />
       ) : (
-        <li className='group/li flex cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-4 py-2 transition-opacity hover:border-opacity-20'>
+        <li className='group/li flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-black border-opacity-0 bg-white px-2 py-2 transition-opacity hover:border-opacity-20'>
           <Checkbox onCheckedChange={handleMarkComplete} />
           <span
-            className={`flex-1 overflow-hidden whitespace-nowrap ${titleStyles}`}
+            className={cn(
+              'flex-1 overflow-hidden whitespace-nowrap text-md',
+              titleStyles,
+            )}
           >
             {task.title}
           </span>
           <span className='rounded bg-slate-600 px-1 opacity-30'>
             {task.due_date || ''}
           </span>
-          <span className='opacity-30'>{task.priority_lvl || ''}</span>
+          <span className='text-md font-light opacity-30'>
+            {task.priority_lvl || ''}
+          </span>
           <TimerDurationDisplay
             minutes={task.timer_duration}
-            className='opacity-30'
+            className='text-md font-light opacity-30'
           />
           {task.timer_duration > 0 && (
-            <Button
+            <PlayIcon
               onClick={handleStartTimer}
-              variant='outline'
-              size='icon'
-              className=''
-            >
-              <PlayIcon className='w-4' />
-            </Button>
+              className='opacity-0 hover:opacity-100 group-hover/li:opacity-30'
+              aria-label='Start Timer'
+            />
           )}
           <Pencil1Icon
             onClick={handleEditTask}
@@ -119,7 +124,7 @@ export default function Task({ task }: TaskProps) {
           />
           <DropdownMenu>
             <DropdownMenuTrigger className='opacity-0 group-hover/li:opacity-80'>
-              <DotsHorizontalIcon />
+              <DotsVerticalIcon />
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='cursor-pointer'>
               <DropdownMenuItem onClick={handleEditTask}>Edit</DropdownMenuItem>

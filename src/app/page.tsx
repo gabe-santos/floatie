@@ -12,10 +12,10 @@ const queryClient = new QueryClient();
 export default function Home() {
   return (
     <QueryClientProvider client={queryClient}>
-      <main className='relative flex h-screen w-screen items-center justify-center overflow-hidden p-8 font-sans'>
-        <div className='flex h-full w-full max-w-screen-lg flex-col items-center gap-10'>
+      <main className='relative flex h-screen w-screen items-center justify-center overflow-hidden p-6 font-sans'>
+        <div className='flex h-full w-full max-w-screen-lg flex-col items-center gap-8'>
           <Greeting />
-          <div className='flex h-full w-full justify-between gap-8'>
+          <div className='flex h-full w-full flex-col items-start justify-between gap-4'>
             <TaskList />
             <Timer />
           </div>
