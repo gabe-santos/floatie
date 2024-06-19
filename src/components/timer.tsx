@@ -50,7 +50,7 @@ export default function Timer() {
   };
 
   return (
-    <div className='flex h-fit w-full max-w-80 items-center justify-between gap-4 rounded-md border bg-white px-4 py-4 shadow-md'>
+    <div className='flex h-fit w-full items-center justify-between gap-4 rounded-md border bg-white px-4 py-4 shadow-md md:max-w-80'>
       <h1
         className='w-[150px] cursor-pointer text-xl'
         onClick={() => {
