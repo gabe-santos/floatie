@@ -6,16 +6,36 @@ const TASKS_KEY = 'floatie-tasks';
 const QUICKLINKS_KEY = 'floatie-quicklinks';
 
 export class LocalStorageService implements IDataService {
+  constructor() {
+    this.fetchTasks = this.fetchTasks.bind(this);
+    this.addTask = this.addTask.bind(this);
+    this.updateTask = this.updateTask.bind(this);
+    this.deleteTask = this.deleteTask.bind(this);
+    this.fetchQuickLinks = this.fetchQuickLinks.bind(this);
+    this.addQuickLink = this.addQuickLink.bind(this);
+    this.updateQuickLink = this.updateQuickLink.bind(this);
+    this.deleteQuickLink = this.deleteQuickLink.bind(this);
+  }
+
   async fetchTasks(): Promise<TaskType[]> {
     const tasks = localStorage.getItem(TASKS_KEY);
+    console.log('succcessfully fetched tasks');
     return tasks ? JSON.parse(tasks) : [];
   }
 
   async addTask(task: TaskType): Promise<TaskType> {
-    const tasks = await this.fetchTasks();
-    tasks.push(task);
-    localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-    return task;
+    try {
+      console.log('Before tasks fetch');
+      const tasks = await this.fetchTasks();
+      console.log('After tasks fetch, tasks:', tasks);
+      tasks.push(task);
+      localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+      console.log('Added task:', task);
+      return task;
+    } catch (error) {
+      console.error('Error adding task to local storage:', error);
+      throw new Error('Could not add task');
+    }
   }
 
   async updateTask(task: TaskType): Promise<TaskType> {

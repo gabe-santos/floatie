@@ -102,14 +102,16 @@ export default function Task({ task }: TaskProps) {
             minutes={task.timer_duration ? task.timer_duration : 0}
             className='text-md font-light opacity-30'
           />
-          {task?.timer_duration ??
-            (0 > 0 && (
-              <PlayIcon
-                onClick={handleStartTimer}
-                className='opacity-0 hover:opacity-100 group-hover/li:opacity-30'
-                aria-label='Start Timer'
-              />
-            ))}
+          {/* Look at this dumb shit 👇 */}
+          {(task?.timer_duration ?? 0) > 0 ? (
+            <PlayIcon
+              onClick={handleStartTimer}
+              className='opacity-0 hover:opacity-100 group-hover/li:opacity-30'
+              aria-label='Start Timer'
+            />
+          ) : (
+            ''
+          )}
           <Pencil1Icon
             onClick={handleEditTask}
             className='opacity-0 hover:opacity-100 group-hover/li:opacity-25'
