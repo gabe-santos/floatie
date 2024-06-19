@@ -75,7 +75,7 @@ export default function FullScreenTimer() {
   return (
     <div
       ref={modalRef}
-      className='fixed flex h-full w-full flex-col items-center justify-center gap-8 bg-red-500'
+      className='fixed flex h-screen w-screen flex-col items-center justify-start gap-8 bg-red-500 md:justify-center'
     >
       <h1 className='font-serif text-8xl font-light text-white'>
         {currentTask}
@@ -85,9 +85,9 @@ export default function FullScreenTimer() {
         duration={lastSetInterval}
         colors={'#ffffff'}
         rotation='counterclockwise'
-        size={500}
+        size={350}
         trailColor='#ffffff00'
-        strokeWidth={20}
+        strokeWidth={10}
       >
         {({ remainingTime }) => (
           <span className='font-serif text-8xl font-light text-white'>
