@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { PlusCircledIcon, PlusIcon } from '@radix-ui/react-icons';
+import { PlusIcon } from '@radix-ui/react-icons';
 import TaskForm from './task-form';
 import { TaskType } from '../types/task';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchTasks, addTask } from '../utils/services/task-service';
 import Task from './task';
 import { Skeleton } from './ui/skeleton';
 import {
@@ -15,6 +14,7 @@ import {
   SelectValue,
 } from './ui/select';
 import { ScrollArea } from './ui/scroll-area';
+import { useDataService } from '@/context/data-service-context';
 
 interface SortingOption {
   label: string;
@@ -61,6 +61,7 @@ const sortTasks = (tasks: TaskType[], sort: string | undefined) => {
 };
 
 export default function TaskList() {
+  const dataService = useDataService();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [sort, setSort] = useState<string | undefined>();
@@ -81,11 +82,11 @@ export default function TaskList() {
     isLoading,
   } = useQuery<TaskType[]>({
     queryKey: ['tasks'],
-    queryFn: fetchTasks,
+    queryFn: dataService.fetchTasks,
   });
 
   const addTaskMutation = useMutation({
-    mutationFn: addTask,
+    mutationFn: dataService.addTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },

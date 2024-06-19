@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import {
-  DotsHorizontalIcon,
-  DotsVerticalIcon,
-  Pencil1Icon,
-  PlayIcon,
-  TimerIcon,
-} from '@radix-ui/react-icons';
+import { DotsVerticalIcon, Pencil1Icon, PlayIcon } from '@radix-ui/react-icons';
 import TaskForm from './task-form';
 import { TaskType } from '../types/task';
 import {
@@ -16,32 +9,30 @@ import {
   DropdownMenuItem,
 } from './ui/dropdown-menu';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  deleteTask,
-  updateTask as updateTaskService,
-} from '../utils/services/task-service';
 import useTimerStore from '../store/timer-store';
 import { Checkbox } from './ui/checkbox';
 import { cn } from '@/lib/utils';
+import { useDataService } from '@/context/data-service-context';
 
 interface TaskProps {
   task: TaskType;
 }
 
 export default function Task({ task }: TaskProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const dataService = useDataService();
   const queryClient = useQueryClient();
+  const [isEditing, setIsEditing] = useState(false);
   const { timerStart, setMinutes, setCurrentTask } = useTimerStore();
 
   const updateTaskMutation = useMutation({
-    mutationFn: updateTaskService,
+    mutationFn: dataService.updateTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
   });
 
   const deleteTaskMutation = useMutation({
-    mutationFn: deleteTask,
+    mutationFn: dataService.deleteTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
@@ -108,16 +99,17 @@ export default function Task({ task }: TaskProps) {
             {task.priority_lvl || ''}
           </span>
           <TimerDurationDisplay
-            minutes={task.timer_duration}
+            minutes={task.timer_duration ? task.timer_duration : 0}
             className='text-md font-light opacity-30'
           />
-          {task.timer_duration > 0 && (
-            <PlayIcon
-              onClick={handleStartTimer}
-              className='opacity-0 hover:opacity-100 group-hover/li:opacity-30'
-              aria-label='Start Timer'
-            />
-          )}
+          {task?.timer_duration ??
+            (0 > 0 && (
+              <PlayIcon
+                onClick={handleStartTimer}
+                className='opacity-0 hover:opacity-100 group-hover/li:opacity-30'
+                aria-label='Start Timer'
+              />
+            ))}
           <Pencil1Icon
             onClick={handleEditTask}
             className='opacity-0 hover:opacity-100 group-hover/li:opacity-25'

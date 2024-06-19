@@ -10,11 +10,6 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  addQuickLink,
-  deleteQuickLink,
-  fetchQuickLinks,
-} from '../utils/services/quick-link-service';
 import { Skeleton } from './ui/skeleton';
 import {
   DropdownMenu,
@@ -24,12 +19,14 @@ import {
 } from './ui/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { generateUniqueInt8Id } from '@/lib/utils';
+import { useDataService } from '@/context/data-service-context';
 
 const fetchWebsiteInfo = async (url: string): Promise<QuickLinkType> => {
   const { data } = await mql(url, { meta: true });
 
   return {
     id: generateUniqueInt8Id(),
+    created_at: Date.now().toString(),
     title: data.title || '',
     url: data.url || '',
     logoUrl: data.logo?.url || '',
@@ -37,23 +34,27 @@ const fetchWebsiteInfo = async (url: string): Promise<QuickLinkType> => {
 };
 
 export default function QuickLinks() {
+  const dataService = useDataService();
   const queryClient = useQueryClient();
 
   const {
     data: links,
     error,
     isLoading,
-  } = useQuery({ queryKey: ['quick-links'], queryFn: fetchQuickLinks });
+  } = useQuery({
+    queryKey: ['quick-links'],
+    queryFn: dataService.fetchQuickLinks,
+  });
 
   const addLinkMutation = useMutation({
-    mutationFn: addQuickLink,
+    mutationFn: dataService.addQuickLink,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quick-links'] });
     },
   });
 
   const deleteLinkMutation = useMutation({
-    mutationFn: deleteQuickLink,
+    mutationFn: dataService.deleteQuickLink,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quick-links'] });
     },
@@ -88,7 +89,7 @@ export default function QuickLinks() {
               className='flex h-full w-full'
             >
               <img
-                src={link.logoUrl}
+                src={link.logoUrl ? link.logoUrl : ''}
                 alt={`${link.title} icon`}
                 width={96}
                 height={96}
