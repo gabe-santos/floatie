@@ -1,6 +1,3 @@
-export type QuickLinkType = {
-  id: number;
-  title: string;
-  url: string;
-  logoUrl: string;
-};
+import { Tables } from './supabase';
+
+export type QuickLinkType = Tables<'quick_links'>;
