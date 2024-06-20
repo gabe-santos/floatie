@@ -11,4 +11,6 @@ export interface IDataService {
   addQuickLink(quickLink: QuickLinkType): Promise<QuickLinkType>;
   updateQuickLink(quickLink: QuickLinkType): Promise<QuickLinkType>;
   deleteQuickLink(id: number): Promise<void>;
+
+  getServiceType(): string; // Returns "LocalStorage or Supabase"
 }

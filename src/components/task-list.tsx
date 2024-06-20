@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { PlusIcon } from '@radix-ui/react-icons';
 import TaskForm from './task-form';
@@ -15,6 +15,8 @@ import {
 } from './ui/select';
 import { ScrollArea } from './ui/scroll-area';
 import { useDataService } from '@/context/data-service-context';
+import { createClient } from '@/utils/supabase/client';
+import { generateUniqueInt8Id } from '@/lib/utils';
 
 interface SortingOption {
   label: string;
@@ -66,15 +68,34 @@ export default function TaskList() {
   const [isEditing, setIsEditing] = useState(false);
   const [sort, setSort] = useState<string | undefined>();
 
-  const defaultTask: TaskType = {
-    id: Math.floor(Math.random() * 1000),
-    title: '',
-    completed: false,
-    due_date: null,
-    priority_lvl: 'Low',
-    timer_duration: 0,
-    created_at: Date.now().toString(),
+  const [defaultTask, setDefaultTask] = useState<TaskType | null>(null);
+
+  const getUser = async () => {
+    const supabase = createClient();
+    if (dataService.getServiceType() === 'Supabase') {
+      const { data } = await supabase.auth.getUser();
+      return data.user?.id || '';
+    }
+    return '';
   };
+
+  useEffect(() => {
+    const initializeDefaultTask = async () => {
+      const userId = await getUser();
+      const task: TaskType = {
+        id: generateUniqueInt8Id(),
+        title: '',
+        completed: false,
+        due_date: null,
+        priority_lvl: 'Low',
+        timer_duration: 0,
+        created_at: new Date().toISOString(),
+        user_id: userId,
+      };
+      setDefaultTask(task);
+    };
+    initializeDefaultTask();
+  }, [dataService]);
 
   const {
     data: tasks,
@@ -87,7 +108,7 @@ export default function TaskList() {
 
   const addTaskMutation = useMutation({
     mutationFn: dataService.addTask,
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
   });

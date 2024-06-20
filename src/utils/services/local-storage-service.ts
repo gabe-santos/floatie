@@ -79,4 +79,8 @@ export class LocalStorageService implements IDataService {
     quickLinks = quickLinks.filter((link) => link.id !== id);
     localStorage.setItem(QUICKLINKS_KEY, JSON.stringify(quickLinks));
   }
+
+  getServiceType(): string {
+    return 'LocalStorage';
+  }
 }

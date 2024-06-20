@@ -15,6 +15,8 @@ export async function login(formData: FormData) {
     password: formData.get('password') as string,
   };
 
+  console.log(formData);
+
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
@@ -43,4 +45,12 @@ export async function signup(formData: FormData) {
 
   revalidatePath('/', 'layout');
   redirect('/');
+}
+
+export async function magicLinkLogin(formData) {
+  const email = formData.get('email') as string;
+  console.log(email);
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.signInWithOtp({ email: email });
+  console.log(error);
 }

@@ -20,15 +20,13 @@ import {
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { generateUniqueInt8Id } from '@/lib/utils';
 import { useDataService } from '@/context/data-service-context';
+import { createClient } from '@/utils/supabase/client';
 
-const fetchWebsiteInfo = async (url: string): Promise<QuickLinkType> => {
+const fetchWebsiteInfo = async (url: string) => {
   const { data } = await mql(url, { meta: true });
 
   return {
-    id: generateUniqueInt8Id(),
-    created_at: Date.now().toString(),
     title: data.title || '',
-    url: data.url || '',
     logoUrl: data.logo?.url || '',
   };
 };
@@ -62,7 +60,24 @@ export default function QuickLinks() {
 
   const handleAddLink = async (url: string) => {
     // Get info via microlink
-    const newQuickLink = await fetchWebsiteInfo(url);
+    const websiteInfo = await fetchWebsiteInfo(url);
+
+    let userId = '';
+    if (dataService.getServiceType() == 'Supabase') {
+      const supabase = createClient();
+      const { data: userData, error } = await supabase.auth.getUser();
+      userId = userData.user?.id || '';
+    }
+
+    const newQuickLink: QuickLinkType = {
+      id: generateUniqueInt8Id(),
+      created_at: new Date().toISOString(),
+      title: websiteInfo.title,
+      url: url,
+      logoUrl: websiteInfo.logoUrl,
+      user_id: userId,
+    };
+
     addLinkMutation.mutate(newQuickLink);
   };
 

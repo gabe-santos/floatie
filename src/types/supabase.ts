@@ -16,6 +16,7 @@ export type Database = {
           logoUrl: string | null
           title: string
           url: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -23,6 +24,7 @@ export type Database = {
           logoUrl?: string | null
           title: string
           url: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -30,8 +32,17 @@ export type Database = {
           logoUrl?: string | null
           title?: string
           url?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quick_links_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tasks: {
         Row: {
@@ -42,6 +53,7 @@ export type Database = {
           priority_lvl: Database["public"]["Enums"]["priority_lvl"]
           timer_duration: number | null
           title: string
+          user_id: string | null
         }
         Insert: {
           completed?: boolean
@@ -51,6 +63,7 @@ export type Database = {
           priority_lvl?: Database["public"]["Enums"]["priority_lvl"]
           timer_duration?: number | null
           title: string
+          user_id?: string | null
         }
         Update: {
           completed?: boolean
@@ -60,8 +73,17 @@ export type Database = {
           priority_lvl?: Database["public"]["Enums"]["priority_lvl"]
           timer_duration?: number | null
           title?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
